@@ -33,12 +33,17 @@ class Grille
 	
 	private void set(Coordonnees coordonnes, Tuile tuile)
 	{
-		set(coordonnes.getLigne(), coordonnes.getColonne(), tuile);
+		if (coordonnes != null)
+			set(coordonnes.getLigne(), coordonnes.getColonne(), tuile);
 	}
 	
 	private void set(int ligne, int colonne, Tuile tuile)
 	{
+		if (tuiles[ligne][colonne] != null)
+			tuiles[ligne][colonne].setCoordonnees(null);
 		tuiles[ligne][colonne] = tuile;
+		if (tuile != null)
+			tuile.setCoordonnees(new Coordonnees(ligne, colonne));
 	}
 	
 	private Tuile get(int ligne, int colonne)
@@ -66,6 +71,16 @@ class Grille
 		
 	}
 	
+	boolean gagne()
+	{
+		return false;
+	}
+	
+	boolean perd()
+	{
+		return false;
+	}
+	
 	@Override
 	public String toString()
 	{
@@ -86,8 +101,7 @@ class Grille
 	public class Coordonnees
 	{
 		private int ligne, colonne;
-		private Grille grille;
-
+		
 		Coordonnees(int ligne, int colonne)
 		{
 			this.ligne = ligne;
@@ -111,33 +125,21 @@ class Grille
 		
 		boolean verifie()
 		{
-			return 0 <= ligne && ligne < grille.getNbLignes() 
-					&& 0 <= colonne && colonne < grille.getNbColonnes(); 
+			return 0 <= ligne && ligne < getNbLignes() 
+					&& 0 <= colonne && colonne < getNbColonnes(); 
 		}
 	}
 	
-	class Direction
+	class Direction extends Coordonnees
 	{
-		private Grille.Coordonnees direction;
-		
-		private Direction(Grille.Coordonnees direction)
+		private Direction(Coordonnees direction)
 		{
-			this.direction = direction;
+			this(direction.getLigne(), direction.getColonne());
 		}
 		
 		private Direction(int ligne, int colonne)
 		{
-			this(new Coordonnees(ligne, colonne));
-		}
-		
-		int getLigne()
-		{
-			return direction.getLigne();
-		}
-
-		int getColonne()
-		{
-			return direction.getColonne();
+			super(ligne, colonne);
 		}
 	}
 	
@@ -149,7 +151,7 @@ class Grille
 		Tuile(Coordonnees coordonnees, int valeur)
 		{
 			this.coordonnees = coordonnees;
-			set(coordonnees, this);
+			setCoordonnees(coordonnees);
 			this.valeur= valeur;
 		}
 		
@@ -158,7 +160,7 @@ class Grille
 			return valeur;
 		}
 		
-		public Coordonnees getCoordonnees()
+		Coordonnees getCoordonnees()
 		{
 			return coordonnees;
 		}

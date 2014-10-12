@@ -35,6 +35,16 @@ public class DeuxMilleQuaranteHuit
 		grille.reset();
 	}
 	
+	public boolean perd()
+	{
+		return grille.perd();
+	}
+	
+	public boolean gagne()
+	{
+		return grille.gagne();
+	}
+	
 	public int getNbLignes()
 	{
 		return grille.getNbLignes();
