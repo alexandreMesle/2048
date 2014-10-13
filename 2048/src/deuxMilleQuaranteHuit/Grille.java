@@ -1,19 +1,23 @@
 package deuxMilleQuaranteHuit;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 class Grille
 {
 	final Direction GAUCHE, DROITE, HAUT, BAS;
 	private int nbLignes, nbColonnes;
-	private Tuile[][] tuiles;
+	private Map<Coordonnees, Tuile> tuiles;
 	private Random random = new Random();
 	
 	Grille(int nbLignes, int nbColonnes)
 	{
 		this.nbLignes = nbLignes;
 		this.nbColonnes = nbColonnes;
-		tuiles = new Tuile[nbLignes][nbColonnes];
+		tuiles = new HashMap<>();
 		GAUCHE = new Direction(0, -1);
 		DROITE = new Direction(0, 1);
 		HAUT = new Direction(-1, 0);
@@ -21,34 +25,51 @@ class Grille
 		new Tuile(nextCoordonnees(), 2);
 	}
 	
+	private int absolut(int x)
+	{
+		return (x >= 0) ? x : -x;
+	}
+	
+	private int nextInt(int maxValue)
+	{
+		return absolut(random.nextInt())%nbLignes;
+	}
+	
+	private List<Coordonnees> casesVides()
+	{
+		List<Coordonnees> liste = new ArrayList<Coordonnees>();
+		return liste;
+	}
+	
 	private Coordonnees nextCoordonnees()
 	{
-		return new Coordonnees(random.nextInt()%nbLignes, random.nextInt()%nbColonnes);
+		return new Coordonnees(nextInt(nbLignes), nextInt(nbColonnes));
 	}
 
 	Tuile get(Coordonnees coordonnees)
 	{
-		return get(coordonnees.getLigne(), coordonnees.getColonne());
+		return tuiles.get(coordonnees);
 	}
 	
-	private void set(Coordonnees coordonnes, Tuile tuile)
+	private void set(Coordonnees coordonnees, Tuile tuile)
 	{
-		if (coordonnes != null)
-			set(coordonnes.getLigne(), coordonnes.getColonne(), tuile);
+		if (coordonnees != null)
+			tuiles.put(coordonnees, tuile);
 	}
 	
 	private void set(int ligne, int colonne, Tuile tuile)
 	{
-		if (tuiles[ligne][colonne] != null)
-			tuiles[ligne][colonne].setCoordonnees(null);
-		tuiles[ligne][colonne] = tuile;
-		if (tuile != null)
-			tuile.setCoordonnees(new Coordonnees(ligne, colonne));
+		set(new Coordonnees(ligne, colonne), tuile);
+	}
+	
+	public boolean estVide(Coordonnees coordonnees)
+	{
+		return get(coordonnees) == null;
 	}
 	
 	private Tuile get(int ligne, int colonne)
 	{
-		return tuiles[ligne][colonne];
+		return get(new Coordonnees(ligne, colonne));
 	}
 	
 	int getNbLignes()
@@ -63,12 +84,27 @@ class Grille
 	
 	void reset()
 	{
-		tuiles = new Tuile[nbLignes][nbColonnes];
+		tuiles.clear();
+	}
+	
+	void mouvement(Direction direction, Coordonnees source)
+	{
+		Direction oppose = direction.oppose();
+		Coordonnees maCase = source;
+		while(maCase.verifie())
+		{
+			if (!estVide(maCase))
+				get(maCase).mouvement(direction);
+			maCase = maCase.plus(oppose);
+		}
 	}
 	
 	void mouvement(Direction direction)
-	{
-		
+	{		
+		for (Coordonnees c : direction.bord())
+		{
+			mouvement(direction, c);
+		}
 	}
 	
 	boolean gagne()
@@ -87,13 +123,14 @@ class Grille
 		String res = "";
 		for (int i = 0 ; i < nbLignes ; i++)
 		{
+			res += "| ";
 			for (int j = 0 ; j < nbColonnes ; j++)
 			{
 				Tuile tuile = get(i, j);  
 				res += (tuile != null) ? tuile.toString() : " ";
-				res += " ";
+				res += " | ";
 			}
-			res += "\n";
+			res += "\n+\n";
 		}
 		return res;
 	}
@@ -128,6 +165,25 @@ class Grille
 			return 0 <= ligne && ligne < getNbLignes() 
 					&& 0 <= colonne && colonne < getNbColonnes(); 
 		}
+		
+		boolean estVide()
+		{
+			return verifie() && Grille.this.estVide(this);
+		}
+
+		@Override
+		public boolean equals(Object o)
+		{
+			Coordonnees other = (Coordonnees)o;
+			return getLigne() == other.getLigne() 
+					&& getColonne() == other.getColonne();
+		}
+		
+		@Override
+		public String toString()
+		{
+			return "(" + ligne + ", " + colonne + ")";
+		}
 	}
 	
 	class Direction extends Coordonnees
@@ -141,6 +197,43 @@ class Grille
 		{
 			super(ligne, colonne);
 		}
+		
+		public Direction oppose()
+		{
+			return new Direction(-getLigne(), -getColonne());
+		}
+		
+		private int depart(int coordonnee, int limite)
+		{
+			if (coordonnee <= 0)
+				return 0;
+			return (limite - 1);
+		}
+		
+		private Coordonnees depart()
+		{
+			return new Coordonnees(depart(getLigne(), getNbLignes()), 
+							depart(getColonne(), getNbColonnes()));
+		}
+		
+		private Direction delta()
+		{
+			return new Direction((getColonne() != 0) ? 1 : 0, 
+					(getLigne() != 0) ? 1 : 0);
+		}
+		
+		public List<Coordonnees> bord()
+		{
+			List<Coordonnees> liste = new ArrayList<>();
+			Coordonnees point = depart();
+			Direction delta = delta();
+			while(point.verifie())
+			{
+				liste.add(point);
+				point = point.plus(delta);
+			}
+			return liste;
+		}
 	}
 	
 	public class Tuile
@@ -150,9 +243,9 @@ class Grille
 		
 		Tuile(Coordonnees coordonnees, int valeur)
 		{
-			this.coordonnees = coordonnees;
 			setCoordonnees(coordonnees);
 			this.valeur= valeur;
+			System.out.println(this.coordonnees);
 		}
 		
 		public int getValeur()
@@ -165,11 +258,24 @@ class Grille
 			return coordonnees;
 		}
 		
-		void setCoordonnees(Coordonnees coordonnes)
+		void setCoordonnees(Coordonnees coordonnees)
 		{
-			set(this.coordonnees, null);
-			this.coordonnees = coordonnes;
-			set(this.coordonnees, this);			
+			if (this.coordonnees != coordonnees)
+			{
+				set(this.coordonnees, null);
+				this.coordonnees = coordonnees;
+				set(this.coordonnees, this);
+			}
+		}
+		
+		void mouvement(Direction direction)
+		{
+			Coordonnees cible = coordonnees.plus(direction);
+			while(cible.estVide())
+			{
+				setCoordonnees(cible);
+				cible = coordonnees.plus(direction);
+			}
 		}
 		
 		@Override
