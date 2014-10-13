@@ -3,38 +3,42 @@ package deuxMilleQuaranteHuit;
 public class DeuxMilleQuaranteHuit 
 {
 	private Grille grille;
+	private int nbLignes, nbColonnes, puissanceGagnante;
+	
+	public DeuxMilleQuaranteHuit(int nbLignes, int nbColonnes, int puissanceGagnante)
+	{
+		this.nbColonnes = nbColonnes;
+		this.nbLignes = nbLignes;
+		this.puissanceGagnante = puissanceGagnante;
+		grille = new Grille(nbLignes, nbColonnes, puissanceGagnante);
+	}
 	
 	public DeuxMilleQuaranteHuit(int nbLignes, int nbColonnes)
 	{
-		grille = new Grille(nbLignes, nbColonnes);
+		this(nbLignes, nbColonnes, 11);
 	}
 	
-	public void gauche()
+	public boolean gauche()
 	{
-		grille.mouvement(grille.GAUCHE);
+		return grille.mouvement(grille.GAUCHE);
 	}
 
-	public void droite()
+	public boolean droite()
 	{
-		grille.mouvement(grille.DROITE);
+		return grille.mouvement(grille.DROITE);
 	}
 
-	public void haut()
+	public boolean haut()
 	{
-		grille.mouvement(grille.HAUT);
+		return grille.mouvement(grille.HAUT);
 	}
 
-	public void bas()
+	public boolean bas()
 	{
-		grille.mouvement(grille.BAS);
+		return grille.mouvement(grille.BAS);
 
 	}
-	
-	public void reset()
-	{
-		grille.reset();
-	}
-	
+
 	public boolean perd()
 	{
 		return grille.perd();
@@ -55,9 +59,29 @@ public class DeuxMilleQuaranteHuit
 		return grille.getNbColonnes();
 	}
 	
-	public Grille.Tuile get(Grille.Coordonnees coordonnees)
+	public Tuile get(Coordonnees coordonnees)
 	{
 		return grille.get(coordonnees);
+	}
+	
+	public int getScore()
+	{
+		return grille.getScore();
+	}
+	
+	public boolean detruireTuile(int ligne, int colonne)
+	{
+		return grille.detruireTuile(new Coordonnees(grille, ligne, colonne));
+	}
+	
+	public boolean annuler()
+	{
+		return grille.annuler();
+	}
+	
+	public boolean retablir()
+	{
+		return grille.retablir();
 	}
 	
 	public String toString()

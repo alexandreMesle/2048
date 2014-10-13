@@ -2,48 +2,56 @@ package deuxMilleQuaranteHuit;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Stack;
 
 class Grille
 {
-	final Direction GAUCHE, DROITE, HAUT, BAS;
+	final Direction GAUCHE = new Direction(this, 0, -1),
+			DROITE = new Direction(this, 0, 1),
+			HAUT = new Direction(this, -1, 0),
+			BAS = new Direction(this, 1, 0);
+	final static int TEMPS_ATTENTE = 100;
 	private int nbLignes, nbColonnes;
-	private Map<Coordonnees, Tuile> tuiles;
-	private Random random = new Random();
+	private Map<Coordonnees, Tuile> tuiles = new HashMap<>();
+	private List<Coordonnees> coordonnees = new LinkedList<>();
+	private int valeurGagnante = 2048;
+	private boolean valeurGagnanteAtteinte = false;
+	private int score = 0;
+	private Stack<Tour> tours = new Stack<>(), toursRetablir = new Stack<>();
 	
-	Grille(int nbLignes, int nbColonnes)
+	Grille(int nbLignes, int nbColonnes, int puissanceGagnante)
 	{
 		this.nbLignes = nbLignes;
 		this.nbColonnes = nbColonnes;
-		tuiles = new HashMap<>();
-		GAUCHE = new Direction(0, -1);
-		DROITE = new Direction(0, 1);
-		HAUT = new Direction(-1, 0);
-		BAS = new Direction(1, 0);
-		new Tuile(nextCoordonnees(), 2);
-	}
-	
-	private int absolut(int x)
-	{
-		return (x >= 0) ? x : -x;
-	}
-	
-	private int nextInt(int maxValue)
-	{
-		return absolut(random.nextInt())%nbLignes;
+		valeurGagnante = Utils.puissance(2, puissanceGagnante);
+		for (int i = 0 ;  i < nbLignes; i++)
+			for (int j = 0 ; j < nbColonnes ; j++)
+				coordonnees.add(new Coordonnees(this, i, j));
+		ajouteTour();
+		getTourActuel().executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
 	}
 	
 	private List<Coordonnees> casesVides()
 	{
 		List<Coordonnees> liste = new ArrayList<Coordonnees>();
+		for (Coordonnees coordonnees : this.coordonnees)
+			if (estVide(coordonnees))
+				liste.add(coordonnees);
 		return liste;
 	}
 	
-	private Coordonnees nextCoordonnees()
+	private Coordonnees coordonneesAleatoires()
 	{
-		return new Coordonnees(nextInt(nbLignes), nextInt(nbColonnes));
+		List<Coordonnees> casesVides = casesVides();
+		return casesVides.get(Utils.nextInt(casesVides.size()));
+	}
+
+	private int valeurAleatoire()
+	{
+		return (Utils.nextBoolean()) ? 2 : 4;
 	}
 
 	Tuile get(Coordonnees coordonnees)
@@ -51,25 +59,33 @@ class Grille
 		return tuiles.get(coordonnees);
 	}
 	
-	private void set(Coordonnees coordonnees, Tuile tuile)
+	void set(Coordonnees coordonnees, Tuile tuile)
 	{
 		if (coordonnees != null)
 			tuiles.put(coordonnees, tuile);
+		else
+			supprime(tuile);
+	}
+
+	void supprime(Tuile tuile)
+	{
+		tuiles.remove(tuile.getCoordonnees());
 	}
 	
-	private void set(int ligne, int colonne, Tuile tuile)
+	boolean detruireTuile(Coordonnees coordonnees)
 	{
-		set(new Coordonnees(ligne, colonne), tuile);
+		ajouteTour();
+		return getTourActuel().executer(new Destruction(this, coordonnees));
 	}
-	
-	public boolean estVide(Coordonnees coordonnees)
+
+	boolean estVide(Coordonnees coordonnees)
 	{
-		return get(coordonnees) == null;
+		return !tuiles.containsKey(coordonnees);
 	}
 	
 	private Tuile get(int ligne, int colonne)
 	{
-		return get(new Coordonnees(ligne, colonne));
+		return get(new Coordonnees(this, ligne, colonne));
 	}
 	
 	int getNbLignes()
@@ -82,220 +98,168 @@ class Grille
 		return nbColonnes;
 	}
 	
-	void reset()
+	void ajouteScore(int score)
 	{
-		tuiles.clear();
+		this.score += score;
+	}
+
+	void enleveScore(int score)
+	{
+		this.score -= score;
 	}
 	
-	void mouvement(Direction direction, Coordonnees source)
+	int getScore()
 	{
-		Direction oppose = direction.oppose();
-		Coordonnees maCase = source;
-		while(maCase.verifie())
+		return score;
+	}
+	
+	int getValeurGagnante()
+	{
+		return valeurGagnante; 
+	}
+	
+	void setValeurGagnanteAtteinte(boolean valeur)
+	{
+		valeurGagnanteAtteinte = valeur; 
+	}
+	
+	boolean uneSeuleTuile()
+	{
+		return tuiles.size() == 1;
+	}
+	
+	private void ajouteTour()
+	{
+		tours.add(new Tour());
+		toursRetablir.clear();
+	}
+	
+	boolean annuler()
+	{
+		if (tours.size() != 1)
 		{
-			if (!estVide(maCase))
-				get(maCase).mouvement(direction);
-			maCase = maCase.plus(oppose);
+			getTourActuel().annuler();
+			toursRetablir.add(getTourActuel());
+			tours.pop();
+			return true;
 		}
+		else
+			return false;
+	}
+
+	boolean retablir()
+	{
+		if (toursRetablir.size() != 0)
+		{
+			toursRetablir.peek().retablir();
+			tours.add(toursRetablir.peek());
+			toursRetablir.pop();
+			return true;
+		}
+		else
+			return false;
+	}
+
+	Tour getTourActuel()
+	{
+		return tours.peek();
 	}
 	
-	void mouvement(Direction direction)
+	void mouvement(final Direction direction, final Coordonnees source)
+	{
+		final Direction oppose = direction.oppose();
+		Runnable r = new Runnable()
+		{
+			public void run()
+			{
+				getTourActuel().ajouteThread();
+				Coordonnees maCase = source;
+				while(maCase.verifie())
+				{
+					if (!estVide(maCase))
+						get(maCase).mouvement(direction);
+					maCase = maCase.plus(oppose);
+					try{Thread.sleep(TEMPS_ATTENTE);} 
+					catch (InterruptedException e){e.printStackTrace();}
+				}
+				getTourActuel().enleveThread();
+				synchronized(Grille.this)
+				{
+					Grille.this.notifyAll();
+				}
+			}
+		};
+		(new Thread(r)).start();
+	}	
+	
+	boolean mouvement(Direction direction)
 	{		
+		ajouteTour();
 		for (Coordonnees c : direction.bord())
-		{
 			mouvement(direction, c);
-		}
+		do
+		{
+			try
+			{
+				synchronized (this)
+				{
+					wait();
+				}
+			} catch (InterruptedException e)
+			{
+				e.printStackTrace();
+			}
+		} 
+		while (getTourActuel().threadsEnCours());
+		if (getTourActuel().getBouge())
+			getTourActuel().executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
+		return getTourActuel().getBouge();
 	}
 	
 	boolean gagne()
 	{
-		return false;
+		return valeurGagnanteAtteinte;
+	}
+	
+	private boolean perd(Coordonnees source, Coordonnees destination)
+	{
+		return (destination.verifie() && 
+				(estVide(destination) || get(destination).getValeur() == get(source).getValeur()));
+
 	}
 	
 	boolean perd()
 	{
-		return false;
+		for (Coordonnees coordonnees : this.coordonnees)
+		{
+			if (estVide(coordonnees))
+				return false;
+			if (perd (coordonnees, coordonnees.plus(BAS)))
+				return false;
+			if (perd (coordonnees, coordonnees.plus(DROITE)))
+				return false;
+		}
+		return true;
 	}
 	
 	@Override
 	public String toString()
 	{
-		String res = "";
+		int largeurLigne = Tuile.LARGEUR_TUILE * getNbColonnes() + 3 * (getNbColonnes() - 1) + 4;
+		char symboleLigne = '-';
+		String res = "Score = " + getScore() + "\n";		
+		res += Utils.ligne(largeurLigne, symboleLigne) + "\n";
 		for (int i = 0 ; i < nbLignes ; i++)
 		{
 			res += "| ";
 			for (int j = 0 ; j < nbColonnes ; j++)
 			{
 				Tuile tuile = get(i, j);  
-				res += (tuile != null) ? tuile.toString() : " ";
+				res += (tuile != null) ? tuile.toString() : String.format("%" + Tuile.LARGEUR_TUILE + "s", "");
 				res += " | ";
 			}
-			res += "\n+\n";
+			res += "\n" + Utils.ligne(largeurLigne, symboleLigne) + "\n";
 		}
 		return res;
-	}
-	
-	public class Coordonnees
-	{
-		private int ligne, colonne;
-		
-		Coordonnees(int ligne, int colonne)
-		{
-			this.ligne = ligne;
-			this.colonne = colonne;
-		}
-		
-		int getLigne()
-		{
-			return ligne;
-		}
-		
-		int getColonne()
-		{
-			return colonne;
-		}
-		
-		Coordonnees plus(Coordonnees autre)
-		{
-			return new Coordonnees(ligne + autre.getLigne(), colonne + autre.getColonne());
-		}
-		
-		boolean verifie()
-		{
-			return 0 <= ligne && ligne < getNbLignes() 
-					&& 0 <= colonne && colonne < getNbColonnes(); 
-		}
-		
-		boolean estVide()
-		{
-			return verifie() && Grille.this.estVide(this);
-		}
-
-		@Override
-		public boolean equals(Object o)
-		{
-			Coordonnees other = (Coordonnees)o;
-			return getLigne() == other.getLigne() 
-					&& getColonne() == other.getColonne();
-		}
-		
-		@Override
-		public String toString()
-		{
-			return "(" + ligne + ", " + colonne + ")";
-		}
-	}
-	
-	class Direction extends Coordonnees
-	{
-		private Direction(Coordonnees direction)
-		{
-			this(direction.getLigne(), direction.getColonne());
-		}
-		
-		private Direction(int ligne, int colonne)
-		{
-			super(ligne, colonne);
-		}
-		
-		public Direction oppose()
-		{
-			return new Direction(-getLigne(), -getColonne());
-		}
-		
-		private int depart(int coordonnee, int limite)
-		{
-			if (coordonnee <= 0)
-				return 0;
-			return (limite - 1);
-		}
-		
-		private Coordonnees depart()
-		{
-			return new Coordonnees(depart(getLigne(), getNbLignes()), 
-							depart(getColonne(), getNbColonnes()));
-		}
-		
-		private Direction delta()
-		{
-			return new Direction((getColonne() != 0) ? 1 : 0, 
-					(getLigne() != 0) ? 1 : 0);
-		}
-		
-		public List<Coordonnees> bord()
-		{
-			List<Coordonnees> liste = new ArrayList<>();
-			Coordonnees point = depart();
-			Direction delta = delta();
-			while(point.verifie())
-			{
-				liste.add(point);
-				point = point.plus(delta);
-			}
-			return liste;
-		}
-	}
-	
-	public class Tuile
-	{
-		private Coordonnees coordonnees;
-		private int valeur;
-		
-		Tuile(Coordonnees coordonnees, int valeur)
-		{
-			setCoordonnees(coordonnees);
-			this.valeur= valeur;
-			System.out.println(this.coordonnees);
-		}
-		
-		public int getValeur()
-		{
-			return valeur;
-		}
-		
-		Coordonnees getCoordonnees()
-		{
-			return coordonnees;
-		}
-		
-		void setCoordonnees(Coordonnees coordonnees)
-		{
-			if (this.coordonnees != coordonnees)
-			{
-				set(this.coordonnees, null);
-				this.coordonnees = coordonnees;
-				set(this.coordonnees, this);
-			}
-		}
-		
-		void mouvement(Direction direction)
-		{
-			Coordonnees cible = coordonnees.plus(direction);
-			while(cible.estVide())
-			{
-				setCoordonnees(cible);
-				cible = coordonnees.plus(direction);
-			}
-		}
-		
-		@Override
-		public String toString()
-		{
-			return "" + valeur;
-		}
-	}
-	
-	class TuileFusionnee extends Tuile
-	{
-		private Tuile tuile1, tuile2;
-		
-		TuileFusionnee(Tuile source, Tuile destination)
-		{
-			super(destination.getCoordonnees(), source.getValeur() * 2);
-			if (source.getValeur() != destination.getValeur())
-				throw new RuntimeException("Impossible de fusionner des tuiles de valeurs différentes.");
-			this.tuile1 = source;
-			this.tuile2 = destination;
-		}
 	}
 }
