@@ -151,9 +151,9 @@ class Grille
 	{
 		if (toursRetablir.size() != 0)
 		{
-			toursRetablir.peek().retablir();
 			tours.add(toursRetablir.peek());
 			toursRetablir.pop();
+			tours.peek().retablir();
 			return true;
 		}
 		else

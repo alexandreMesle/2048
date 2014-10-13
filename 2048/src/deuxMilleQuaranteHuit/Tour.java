@@ -152,14 +152,18 @@ class Fusion extends Operation
 		coordonneesSource = source.getCoordonnees();
 		coordonneesDestination = source.getCoordonnees().plus(direction);
 		destination = grille.get(coordonneesDestination);
+		tuile = new TuileFusionnee(grille, source, destination);
 	}
 	
 	boolean executer()
 	{
-		if (destination != null && source.getValeur() == destination.getValeur()
-				&& destination.getTour() != grille.getTourActuel())
-			tuile = new TuileFusionnee(grille, source, destination);
-		else
+		if (destination == null)
+			return false;
+		if (source.getTour() == grille.getTourActuel() || destination.getTour() == grille.getTourActuel())
+			return false;
+		if (source.getValeur() != destination.getValeur())
+			return false;
+		if (source.distance(destination) != 1)
 			return false;
 		tuile.setCoordonnees(destination.getCoordonnees());
 		source.setCoordonnees(null);

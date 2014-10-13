@@ -10,12 +10,17 @@ public class DeuxMilleQuaranteHuit
 		this.nbColonnes = nbColonnes;
 		this.nbLignes = nbLignes;
 		this.puissanceGagnante = puissanceGagnante;
-		grille = new Grille(nbLignes, nbColonnes, puissanceGagnante);
+		reset();
 	}
 	
 	public DeuxMilleQuaranteHuit(int nbLignes, int nbColonnes)
 	{
 		this(nbLignes, nbColonnes, 11);
+	}
+
+	public void reset()
+	{
+		grille = new Grille(nbLignes, nbColonnes, puissanceGagnante);
 	}
 	
 	public boolean gauche()
@@ -36,7 +41,6 @@ public class DeuxMilleQuaranteHuit
 	public boolean bas()
 	{
 		return grille.mouvement(grille.BAS);
-
 	}
 
 	public boolean perd()

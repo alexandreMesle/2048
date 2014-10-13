@@ -64,11 +64,5 @@ class TuileFusionnee extends Tuile
 	TuileFusionnee(Grille grille, Tuile source, Tuile destination)
 	{
 		super(grille, null, source.getValeur() * 2);
-		if (source.getTour() == grille.getTourActuel() || destination.getTour() == grille.getTourActuel())
-			throw new RuntimeException("Une des tuiles a déjà été crée lors de ce tour.");
-		if (source.getValeur() != destination.getValeur())
-			throw new RuntimeException("Impossible de fusionner des tuiles de valeurs différentes.");
-		if (source.distance(destination) != 1)
-			throw new RuntimeException("Impossible de fusionner des tuiles non adjacentes.");
 	}
 }

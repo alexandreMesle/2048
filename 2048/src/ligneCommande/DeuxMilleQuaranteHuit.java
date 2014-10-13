@@ -8,7 +8,7 @@ public class DeuxMilleQuaranteHuit
 {
 	private static final char HAUT = '8', BAS = '2', DROITE = '6', GAUCHE='4', MODE_TRICHE = 't', 
 			AIDE = 'h', ANNULER = 'u', RETABLIR = 'r'; 
-	private static final int NB_LIGNES = 3, NB_COLONNES = 3, PUISSANCE_GAGNANTE = 4;
+	private static final int NB_LIGNES = 4, NB_COLONNES = 4, PUISSANCE_GAGNANTE = 5;
 	deuxMilleQuaranteHuit.DeuxMilleQuaranteHuit deuxMilleQuaranteHuit = 
 			new deuxMilleQuaranteHuit.DeuxMilleQuaranteHuit(NB_LIGNES, NB_COLONNES, PUISSANCE_GAGNANTE);  
 	
