@@ -1,7 +1,10 @@
-package deuxMilleQuaranteHuit;
+package _2048;
 
-public class Tuile
+import java.io.Serializable;
+
+public class Tuile implements Serializable
 {
+	private static final long serialVersionUID = 8239151527953937239L;
 	final static int LARGEUR_TUILE= 5; 
 	private Grille grille;
 	private Coordonnees coordonnees;
@@ -61,6 +64,8 @@ public class Tuile
 
 class TuileFusionnee extends Tuile
 {
+	private static final long serialVersionUID = -184129757574441051L;
+
 	TuileFusionnee(Grille grille, Tuile source, Tuile destination)
 	{
 		super(grille, null, source.getValeur() * 2);

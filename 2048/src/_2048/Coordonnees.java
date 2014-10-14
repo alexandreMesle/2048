@@ -1,10 +1,12 @@
-package deuxMilleQuaranteHuit;
+package _2048;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Coordonnees
+public class Coordonnees implements Serializable
 {
+	private static final long serialVersionUID = 8976684575490475011L;
 	private int ligne, colonne;
 	protected Grille grille;
 
@@ -71,6 +73,8 @@ public class Coordonnees
 
 class Direction extends Coordonnees
 {
+	private static final long serialVersionUID = -2309155139265325090L;
+
 	Direction(Grille grille, Coordonnees direction)
 	{
 		this(grille, direction.getLigne(), direction.getColonne());

@@ -1,4 +1,4 @@
-package deuxMilleQuaranteHuit;
+package _2048;
 
 import java.util.Random;
 

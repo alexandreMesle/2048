@@ -1,5 +1,6 @@
-package deuxMilleQuaranteHuit;
+package _2048;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -7,8 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-class Grille
+class Grille implements Serializable
 {
+	private static final long serialVersionUID = -1393369598429605704L;
 	final Direction GAUCHE = new Direction(this, 0, -1),
 			DROITE = new Direction(this, 0, 1),
 			HAUT = new Direction(this, -1, 0),

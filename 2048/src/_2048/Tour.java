@@ -1,9 +1,11 @@
-package deuxMilleQuaranteHuit;
+package _2048;
 
+import java.io.Serializable;
 import java.util.Stack;
 
-class Tour
+class Tour implements Serializable
 {
+	private static final long serialVersionUID = -6603904945201105393L;
 	private int nbThreads = 0;
 	private Stack<Operation> operations = new Stack<>(), operationsRetablir = new Stack<>();
 	
@@ -58,10 +60,12 @@ class Tour
 	}	
 }
 
-abstract class Operation
+abstract class Operation implements Serializable
 {
+	private static final long serialVersionUID = 4452112939719850396L;
 	protected int score;
 	protected Grille grille;
+	protected boolean operationGagnante = false;
 	
 	Operation (Grille grille, int score)
 	{
@@ -72,17 +76,27 @@ abstract class Operation
 	boolean executer()
 	{
 		grille.ajouteScore(score);
+		if (operationGagnante)
+			grille.setValeurGagnanteAtteinte(true);
 		return true;
 	}
 	
 	void annuler()
 	{
 		grille.enleveScore(score);		
+		if (operationGagnante)
+			grille.setValeurGagnanteAtteinte(false);
+	}
+	
+	void setOperationGagnante()
+	{
+		operationGagnante = true;
 	}
 }
 
 class Deplacement extends Operation
 {
+	private static final long serialVersionUID = 4345504943178469271L;
 	private Coordonnees source, destination;
 	private Tuile tuile;
 
@@ -114,6 +128,7 @@ class Deplacement extends Operation
 
 class Creation extends Operation
 {
+	private static final long serialVersionUID = -5040720192393632469L;
 	private Coordonnees coordonnees; 
 	private Tuile tuile;
 	
@@ -141,6 +156,7 @@ class Creation extends Operation
 
 class Fusion extends Operation
 {
+	private static final long serialVersionUID = 6846331205920753895L;
 	private Tuile source, destination;
 	private Coordonnees coordonneesSource, coordonneesDestination;
 	private TuileFusionnee tuile;
@@ -167,8 +183,8 @@ class Fusion extends Operation
 			return false;
 		tuile.setCoordonnees(destination.getCoordonnees());
 		source.setCoordonnees(null);
-		if (tuile.getValeur() == grille.getValeurGagnante())
-			grille.setValeurGagnanteAtteinte(true);
+		if (!grille.gagne() && tuile.getValeur() == grille.getValeurGagnante())
+			setOperationGagnante();
 		return super.executer();
 	}
 	
@@ -184,6 +200,7 @@ class Fusion extends Operation
 
 class Destruction extends Operation
 {
+	private static final long serialVersionUID = -6836602562059509073L;
 	private Coordonnees coordonnees;
 	private Tuile tuile;
 	

@@ -1,16 +1,27 @@
 package ligneCommande;
 
 import java.io.BufferedReader;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
+import _2048.Jeu2048;
 
-public class DeuxMilleQuaranteHuit
+
+public class Interface2048
 {
 	private static final char HAUT = '8', BAS = '2', DROITE = '6', GAUCHE='4', MODE_TRICHE = 't', 
-			AIDE = 'h', ANNULER = 'u', RETABLIR = 'r'; 
-	private static final int NB_LIGNES = 4, NB_COLONNES = 4, PUISSANCE_GAGNANTE = 5;
-	deuxMilleQuaranteHuit.DeuxMilleQuaranteHuit deuxMilleQuaranteHuit = 
-			new deuxMilleQuaranteHuit.DeuxMilleQuaranteHuit(NB_LIGNES, NB_COLONNES, PUISSANCE_GAGNANTE);  
+			AIDE = 'h', ANNULER = 'u', RETABLIR = 'r', QUITTER = 'q', REINITIALISER = 'x'; 
+	private static final int NB_LIGNES = 4, NB_COLONNES = 4, PUISSANCE_GAGNANTE = 3;
+	private static final String FILE_NAME = "sauvegarde",
+			AIDE_TEXT = "texte";
+	private Jeu2048 jeu2048;
+	
+	public Interface2048()
+	{
+		jeu2048 = Jeu2048.restaurer(FILE_NAME);
+		if (jeu2048 == null)
+			jeu2048 = new Jeu2048(NB_LIGNES, NB_COLONNES, PUISSANCE_GAGNANTE);  
+	}
 	
 	private String saisieString(String message)
 	{
@@ -41,52 +52,70 @@ public class DeuxMilleQuaranteHuit
 	{
 		String ligne = saisieString("ligne ? ");
 		String colonne = saisieString("colonne ? ");
-		if (!deuxMilleQuaranteHuit.detruireTuile(new Integer(ligne), new Integer(colonne)))
+		if (!jeu2048.detruireTuile(new Integer(ligne), new Integer(colonne)))
 			System.out.println("Imposible de supprimer la tuile.");
 	}
 	
 	public void annuler()
 	{
-		if (!deuxMilleQuaranteHuit.annuler())
+		if (!jeu2048.annuler())
 			System.out.println("Aucune opération à annuler.");
 	}
 	
 	public void retablir()
 	{
-		if (!deuxMilleQuaranteHuit.retablir())
+		if (!jeu2048.retablir())
 			System.out.println("Aucune opération à retablir.");
 	}
-	
+
+
+	public void reinitialiser()
+	{
+		jeu2048.reinitialiser();
+	}
+
+	public void quitter()
+	{
+		if (!jeu2048.sauvegarder(FILE_NAME))
+			System.out.println("Impossible de sauvegarder la partie.");
+		System.out.println("Au revoir !");
+		System.exit(0);
+	}
+
+	public void aide()
+	{
+		System.out.println(AIDE_TEXT);
+	}
+
 	public void jouer()
 	{
-		boolean gagner = false;
-		System.out.println(deuxMilleQuaranteHuit);
-		while (!deuxMilleQuaranteHuit.perd())
+		System.out.println(jeu2048);
+		while (!jeu2048.perd())
 		{
 			switch(saisieChar("Option ? (h pour l'aide)"))
 			{
-				case HAUT : deuxMilleQuaranteHuit.haut();break;
-				case BAS : deuxMilleQuaranteHuit.bas();break;
-				case GAUCHE : deuxMilleQuaranteHuit.gauche();break;
-				case DROITE : deuxMilleQuaranteHuit.droite();break;
+				case HAUT : jeu2048.haut();break;
+				case BAS : jeu2048.bas();break;
+				case GAUCHE : jeu2048.gauche();break;
+				case DROITE : jeu2048.droite();break;
 				case MODE_TRICHE : modeTriche() ; break;
 				case ANNULER : annuler() ; break;
 				case RETABLIR : retablir() ; break;
+				case QUITTER : quitter() ; break;
+				case REINITIALISER : reinitialiser() ; break;
+				case AIDE : aide() ; break;
 				default : System.out.println("Erreur de saisie");
 			}
-			if (!gagner && deuxMilleQuaranteHuit.gagne())
-			{
+			if (jeu2048.gagne())
 				System.out.println("Vous avez gagné !");
-				gagner = true;
-			}
-			System.out.println(deuxMilleQuaranteHuit);			
+			System.out.println(jeu2048);			
 		}
 		System.out.println("La partie est terminée...");
 	}
 	
 	public static void main(String[] args)
 	{
-		DeuxMilleQuaranteHuit deuxMilleQuaranteHuit = new DeuxMilleQuaranteHuit();
+		Interface2048 deuxMilleQuaranteHuit = new Interface2048();
 		deuxMilleQuaranteHuit.jouer();
 	}
 }
