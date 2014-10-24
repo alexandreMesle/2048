@@ -85,10 +85,15 @@ public class JFrame2048
 		frame.setEnabled(b);
 	}
 	
+	private boolean demandeConfirmation(String message)
+	{
+		return JOptionPane.showConfirmDialog(frame, message, "", JOptionPane.YES_NO_OPTION) 
+				== JOptionPane.YES_OPTION;
+	}
+	
 	private void reinitialiser()
 	{
-		if (JOptionPane.showConfirmDialog(frame, "Cette action vous fera abandonner la partie en cours. Etes-vous sûr "
-				+ "de vouloir continuer ?", "", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION)
+		if (demandeConfirmation("Cette action vous fera abandonner la partie en cours. Etes-vous sûr de vouloir continuer ?"))
 		{
 			jeu2048.setCoordonneesListener(null);
 			jeu2048.reinitialiser();
@@ -100,11 +105,8 @@ public class JFrame2048
 	
 	private void sauvegarder()
 	{
-		if (JOptionPane.showConfirmDialog(frame, "Souhaitez vous sauvegarder cette partie ?", "", JOptionPane.YES_NO_OPTION) 
-				== JOptionPane.YES_OPTION)
-		{
+		if (demandeConfirmation("Souhaitez vous sauvegarder cette partie ?")) 
 			jeu2048.sauvegarder(FILE_NAME);
-		}
 	}
 	
 	private JPanel getMainPanel()
@@ -122,8 +124,8 @@ public class JFrame2048
 		if (grillePanel == null)
 			grillePanel = new JPanel();
 		grillePanel.removeAll();
-		grillePanel.setLayout(new GridLayout(getNbLignes(), getNbColonnes()));
 		labels.clear();
+		grillePanel.setLayout(new GridLayout(getNbLignes(), getNbColonnes()));
 		for (Coordonnees coordonnees : jeu2048)
 		{
 			Tuile tuile = jeu2048.get(coordonnees);
@@ -156,30 +158,9 @@ public class JFrame2048
 		return panel;
 	}
 
-	private JButton getBouton(final int direction)
+	private ActionListener getBoutonListener(final int direction)
 	{
-		JButton bouton = new JButton();
-		switch (direction)
-		{
-		case HAUT: bouton.setText("haut"); 
-				bouton.setMnemonic(KeyEvent.VK_UP);
-				bouton.setToolTipText("Alt + flèche haut");;
-				break;
-		case BAS: bouton.setText("bas") ;
-				bouton.setMnemonic(KeyEvent.VK_DOWN);
-				bouton.setToolTipText("Alt + flèche bas");;
-				break;
-		case GAUCHE: bouton.setText("gauche");
-				bouton.setMnemonic(KeyEvent.VK_LEFT);
-				bouton.setToolTipText("Alt + flèche gauche");;
-				break;
-		case DROITE: bouton.setText("droite"); 
-				bouton.setMnemonic(KeyEvent.VK_RIGHT);
-				bouton.setToolTipText("Alt + flèche droite");;
-				break;
-			default: System.out.println("erreur !");
-		}
-		bouton.addActionListener(new ActionListener()
+		return new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0)
@@ -203,7 +184,30 @@ public class JFrame2048
 				};
 				(new Thread(r)).start();
 			}
-		});
+		};
+	}
+
+	private JButton getBouton(String label, int key, String tipToolText)
+	{
+		JButton bouton = new JButton();
+		bouton.setText(label); 
+		bouton.setMnemonic(key);
+		bouton.setToolTipText(tipToolText);
+		return bouton;
+	}
+	
+	private JButton getBouton(int direction)
+	{
+		JButton bouton = null;
+		switch (direction)
+		{
+		case HAUT: bouton = getBouton("haut", KeyEvent.VK_UP, "Alt + flèche haut");	break;
+		case BAS: bouton = getBouton("bas", KeyEvent.VK_DOWN, "Alt + flèche bas"); break;
+		case GAUCHE: bouton = getBouton("gauche", KeyEvent.VK_LEFT, "Alt + flèche gauche");	break;
+		case DROITE: bouton = getBouton("droite", KeyEvent.VK_RIGHT, "Alt + flèche droite"); break;
+			default: throw new RuntimeException("direction inconnue " + direction);
+		}
+		bouton.addActionListener(getBoutonListener(direction));
 		return bouton;
 	}
 
@@ -226,7 +230,6 @@ public class JFrame2048
 		MenuItem item = new MenuItem("Réinitialiser");
 		item.addActionListener(new ActionListener()
 		{
-			
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
@@ -236,49 +239,55 @@ public class JFrame2048
 		return item;
 	}
 
-	private MenuItem getItemNbLignes()
+	private ActionListener getNbLignesListener(final String message, final boolean lignes)
 	{
-		MenuItem item = new MenuItem("Changer le nombre de lignes");
-		item.addActionListener(new ActionListener()
+		return new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				String nbLignes = (String)JOptionPane.showInputDialog("Nombre de lignes");
-				if (nbLignes != null)
+				String nb = (String)JOptionPane.showInputDialog(message);
+				if (nb != null)
 				{
-					jeu2048.setNbLignes(new Integer(nbLignes));
+					if (lignes)
+						jeu2048.setNbLignes(new Integer(nb));
+					else
+						jeu2048.setNbColonnes(new Integer(nb));
 					reinitialiser();
 				}
 			}
-		});
+		};
+	}
+	
+	private MenuItem getItemNbLignes()
+	{
+		MenuItem item = new MenuItem("Changer le nombre de lignes");
+		item.addActionListener(getNbLignesListener("Nombre de lignes", true));
 		return item;
 	}
 
 	private MenuItem getItemNbColonnes()
 	{
 		MenuItem item = new MenuItem("Changer le nombre de colonnes");
-		item.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				String nbColonnes= (String)JOptionPane.showInputDialog("Nombre de colonnes");
-				if (nbColonnes != null)
-				{
-					jeu2048.setNbColonnes(new Integer(nbColonnes));
-					reinitialiser();
-					
-				}
-			}
-		});
+		item.addActionListener(getNbLignesListener("Nombre de colonnes", false));
 		return item;
 	}
 
-	private MenuItem getItemAnnuler()
+	private Listener<Boolean> getAnnulableListener(final MenuItem item)
 	{
-		final MenuItem item = new MenuItem("Annuler");
-		item.addActionListener(new ActionListener()
+		return new Listener<Boolean>()
+		{
+			@Override
+			public void actionPerformed(Boolean action)
+			{
+				item.setEnabled(action);
+			}
+		};
+	}
+
+	private ActionListener getAnnulerListener(final boolean annuler)
+	{
+		return new ActionListener()
 		{
 			@Override
 			public void actionPerformed(ActionEvent arg0)
@@ -289,82 +298,60 @@ public class JFrame2048
 					public void run()
 					{
 						enableFenetre(false);
-						jeu2048.annuler();
+						if (annuler)
+							jeu2048.annuler();
+						else
+							jeu2048.retablir();
 						enableFenetre(true);
 					}
 				};
 				(new Thread(r)).start();
 			}
-		});
+		};
+	}
+	
+	private MenuItem getItemAnnuler()
+	{
+		final MenuItem item = new MenuItem("Annuler");
+		item.addActionListener(getAnnulerListener(true));
 		item.setShortcut(new MenuShortcut(KeyEvent.VK_Z));
-		jeu2048.setAnnulableListener(new Listener<Boolean>()
-		{
-			@Override
-			public void actionPerformed(Boolean action)
-			{
-				item.setEnabled(action);
-			}
-		});
+		jeu2048.setAnnulableListener(getAnnulableListener(item));
 		return item;
 	}
 
 	private MenuItem getItemRetablir()
 	{
 		final MenuItem item = new MenuItem("Rétablir");
-		item.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				Runnable r = new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						enableFenetre(false);
-						jeu2048.retablir();
-						enableFenetre(true);
-					}
-				};
-				(new Thread(r)).start();
-			}
-		});
-		jeu2048.setRetablissableListener(new Listener<Boolean>()
-		{
-			@Override
-			public void actionPerformed(Boolean action)
-			{
-				item.setEnabled(action);
-			}
-		});
+		item.addActionListener(getAnnulerListener(false));
 		item.setShortcut(new MenuShortcut(KeyEvent.VK_R));
+		jeu2048.setRetablissableListener(getAnnulableListener(item));
 		return item;
 	}
 
 	private Listener<Coordonnees> getCoordonneesListener()
 	{
 		return new Listener<Coordonnees>()
-				{
-					@Override
-					public void actionPerformed(Coordonnees coordonnees)
-					{
-						TuileLabel label = labels.get(coordonnees); 
-						Tuile tuile = jeu2048.get(coordonnees); 
-						label.setValeur((tuile != null) ? tuile.getValeur() : 0);
-					}
-				};		
+		{
+			@Override
+			public void actionPerformed(Coordonnees coordonnees)
+			{
+				TuileLabel label = labels.get(coordonnees); 
+				Tuile tuile = jeu2048.get(coordonnees); 
+				label.setValeur((tuile != null) ? tuile.getValeur() : 0);
+			}
+		};		
 	}
 	
 	private Listener<Integer> getScoreListener(final JLabel label )
 	{
 		return new Listener<Integer>()
-				{
-					@Override
-					public void actionPerformed(Integer score)
-					{
-						label.setText("Score = " + score);
-					}
-				};		
+		{
+			@Override
+			public void actionPerformed(Integer score)
+			{
+				label.setText("Score = " + score);
+			}
+		};		
 	}
 
 	private WindowListener getWindowListener()
