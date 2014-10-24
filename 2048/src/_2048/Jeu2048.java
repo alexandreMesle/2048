@@ -6,12 +6,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Iterator;
 
-public class Jeu2048 implements Serializable
+public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 {
 	private static final long serialVersionUID = 8905215052383616386L;
 	private Grille grille;
 	private int nbLignes, nbColonnes, puissanceGagnante;
+	transient private Listener<Coordonnees> coordonneesListener = null;
+	transient private Listener<Integer> scoreListener = null;
+	transient private Listener<Boolean> annulableListener = null, 
+			retablissableListener;
+	
 	
 	public Jeu2048(int nbLignes, int nbColonnes, int puissanceGagnante)
 	{
@@ -29,6 +35,11 @@ public class Jeu2048 implements Serializable
 	public void reinitialiser()
 	{
 		grille = new Grille(nbLignes, nbColonnes, puissanceGagnante);
+		grille.setCoordonneesListener(coordonneesListener);
+		grille.setScoreListener(scoreListener);
+		grille.setAnnulableListener(annulableListener);
+		grille.setRetablissableListener(retablissableListener);		
+		System.out.println("réinitialisé !!!");
 	}
 	
 	public boolean gauche()
@@ -66,7 +77,7 @@ public class Jeu2048 implements Serializable
 		return grille.getNbLignes();
 	}
 	
-	public int getNbColones()
+	public int getNbColonnes()
 	{
 		return grille.getNbColonnes();
 	}
@@ -146,10 +157,38 @@ public class Jeu2048 implements Serializable
 		return jeu2048;
 	}
 
+	public void setCoordonneesListener(Listener<Coordonnees> listener)
+	{
+		coordonneesListener = listener;
+		grille.setCoordonneesListener(listener);
+	}
 	
+	public void setScoreCoordonneesListener(Listener<Integer> listener)
+	{
+		scoreListener = listener;
+		grille.setScoreListener(listener);
+	}
+	
+	public void setAnnulableListener(Listener<Boolean> listener)
+	{
+		annulableListener = listener;
+		grille.setAnnulableListener(listener);
+	}
+	
+	public void setRetablissableListener(Listener<Boolean> listener)
+	{
+		retablissableListener = listener;
+		grille.setRetablissableListener(listener);
+	}
 	
 	public String toString()
 	{
 		return grille.toString();
+	}
+
+	@Override
+	public Iterator<Coordonnees> iterator()
+	{
+		return grille.iterator();
 	}
 }

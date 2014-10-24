@@ -46,8 +46,8 @@ public class Tuile implements Serializable
 	
 	void mouvement(Direction direction)
 	{
-		while(grille.getTourActuel().executer(new Deplacement(grille, this, direction)));
-		grille.getTourActuel().executer(new Fusion(grille, this, direction));
+		while(grille.executer(new Deplacement(grille, this, direction)));
+		grille.executer(new Fusion(grille, this, direction));
 	}
 	
 	int distance(Tuile autre)

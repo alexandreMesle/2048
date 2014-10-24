@@ -3,19 +3,20 @@ package _2048;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-class Grille implements Serializable
+class Grille implements Serializable, Iterable<Coordonnees>
 {
 	private static final long serialVersionUID = -1393369598429605704L;
 	final Direction GAUCHE = new Direction(this, 0, -1),
 			DROITE = new Direction(this, 0, 1),
 			HAUT = new Direction(this, -1, 0),
 			BAS = new Direction(this, 1, 0);
-	final static int TEMPS_ATTENTE = 100;
+	final static int TEMPS_ATTENTE = 20;
 	private int nbLignes, nbColonnes;
 	private Map<Coordonnees, Tuile> tuiles = new HashMap<>();
 	private List<Coordonnees> coordonnees = new LinkedList<>();
@@ -23,6 +24,10 @@ class Grille implements Serializable
 	private boolean valeurGagnanteAtteinte = false;
 	private int score = 0;
 	private Stack<Tour> tours = new Stack<>(), toursRetablir = new Stack<>();
+	private transient Listener<Coordonnees> coordonneesListener = null;
+	private transient Listener<Integer> scoreListener = null;
+	private transient Listener<Boolean> annulableListener = null, 
+			retablissableListener = null;
 	
 	Grille(int nbLignes, int nbColonnes, int puissanceGagnante)
 	{
@@ -33,7 +38,7 @@ class Grille implements Serializable
 			for (int j = 0 ; j < nbColonnes ; j++)
 				coordonnees.add(new Coordonnees(this, i, j));
 		ajouteTour();
-		getTourActuel().executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
+		executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
 	}
 	
 	private List<Coordonnees> casesVides()
@@ -64,20 +69,25 @@ class Grille implements Serializable
 	void set(Coordonnees coordonnees, Tuile tuile)
 	{
 		if (coordonnees != null)
+		{
 			tuiles.put(coordonnees, tuile);
+			actionPerformed(coordonnees);
+		}
 		else
-			supprime(tuile);
+			supprime(tuile);		
 	}
 
 	void supprime(Tuile tuile)
 	{
-		tuiles.remove(tuile.getCoordonnees());
+		Coordonnees coordonnees = tuile.getCoordonnees();
+		tuiles.remove(coordonnees);
+		actionPerformed(coordonnees);
 	}
 	
 	boolean detruireTuile(Coordonnees coordonnees)
 	{
 		ajouteTour();
-		return getTourActuel().executer(new Destruction(this, coordonnees));
+		return executer(new Destruction(this, coordonnees));
 	}
 
 	boolean estVide(Coordonnees coordonnees)
@@ -103,11 +113,13 @@ class Grille implements Serializable
 	void ajouteScore(int score)
 	{
 		this.score += score;
+		actionPerformed(this.score);
 	}
 
 	void enleveScore(int score)
 	{
 		this.score -= score;
+		actionPerformed(this.score);
 	}
 	
 	int getScore()
@@ -133,16 +145,28 @@ class Grille implements Serializable
 	private void ajouteTour()
 	{
 		tours.add(new Tour());
-		toursRetablir.clear();
+		toursRetablir.clear();		
 	}
+	
+	private boolean annulable()
+	{
+		return tours.size() != 1;
+	}
+
+	private boolean retablissable()
+	{
+		return !toursRetablir.isEmpty();
+	}
+
 	
 	boolean annuler()
 	{
-		if (tours.size() != 1)
+		if (annulable())
 		{
 			getTourActuel().annuler();
 			toursRetablir.add(getTourActuel());
 			tours.pop();
+			actionPerformedHistorique();
 			return true;
 		}
 		else
@@ -151,11 +175,12 @@ class Grille implements Serializable
 
 	boolean retablir()
 	{
-		if (toursRetablir.size() != 0)
+		if (retablissable())
 		{
 			tours.add(toursRetablir.peek());
 			toursRetablir.pop();
 			tours.peek().retablir();
+			actionPerformedHistorique();
 			return true;
 		}
 		else
@@ -165,6 +190,11 @@ class Grille implements Serializable
 	Tour getTourActuel()
 	{
 		return tours.peek();
+	}
+	
+	boolean executer(Operation operation)
+	{
+		return getTourActuel().executer(operation);
 	}
 	
 	void mouvement(final Direction direction, final Coordonnees source)
@@ -181,7 +211,7 @@ class Grille implements Serializable
 					if (!estVide(maCase))
 						get(maCase).mouvement(direction);
 					maCase = maCase.plus(oppose);
-					try{Thread.sleep(TEMPS_ATTENTE);} 
+					try{Thread.sleep(TEMPS_ATTENTE);}
 					catch (InterruptedException e){e.printStackTrace();}
 				}
 				getTourActuel().enleveThread();
@@ -213,9 +243,10 @@ class Grille implements Serializable
 			}
 		} 
 		while (getTourActuel().threadsEnCours());
-		if (getTourActuel().getBouge())
-			getTourActuel().executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
-		return getTourActuel().getBouge();
+		if (getTourActuel().getMouvementEffectue())
+			executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
+		actionPerformedHistorique();
+		return getTourActuel().getMouvementEffectue();
 	}
 	
 	boolean gagne()
@@ -263,5 +294,56 @@ class Grille implements Serializable
 			res += "\n" + Utils.ligne(largeurLigne, symboleLigne) + "\n";
 		}
 		return res;
+	}
+	
+	void setCoordonneesListener(Listener<Coordonnees> listener)
+	{
+		this.coordonneesListener = listener;
+		for (Coordonnees coordonnees : tuiles.keySet())
+			actionPerformed(coordonnees);
+	}
+	
+	void actionPerformed(Coordonnees coordonnees)
+	{
+		if (coordonneesListener != null && coordonnees != null)
+			coordonneesListener.actionPerformed(coordonnees);	
+	}
+
+	void setScoreListener(Listener<Integer> listener)
+	{
+		this.scoreListener = listener;
+		listener.actionPerformed(getScore());
+	}
+	
+	void actionPerformed(Integer score)
+	{
+		if (scoreListener != null)
+			scoreListener.actionPerformed(score);	
+	}
+
+	void setAnnulableListener(Listener<Boolean> listener)
+	{
+		this.annulableListener = listener;
+		actionPerformedHistorique();
+	}
+	
+	void setRetablissableListener(Listener<Boolean> listener)
+	{
+		this.retablissableListener = listener;
+		actionPerformedHistorique();
+	}
+	
+	void actionPerformedHistorique()
+	{
+		if (annulableListener != null)
+			annulableListener.actionPerformed(annulable());
+		if (retablissableListener != null)
+			retablissableListener.actionPerformed(retablissable());
+	}
+
+	@Override
+	public Iterator<Coordonnees> iterator()
+	{
+		return coordonnees.iterator();
 	}
 }

@@ -1,26 +1,41 @@
 package ligneCommande;
 
 import java.io.BufferedReader;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import _2048.Coordonnees;
 import _2048.Jeu2048;
+import _2048.Listener;
 
 
-public class Interface2048
+public class LigneCommande2048
 {
 	private static final char HAUT = '8', BAS = '2', DROITE = '6', GAUCHE='4', MODE_TRICHE = 't', 
 			AIDE = 'h', ANNULER = 'u', RETABLIR = 'r', QUITTER = 'q', REINITIALISER = 'x'; 
-	private static final int NB_LIGNES = 4, NB_COLONNES = 4, PUISSANCE_GAGNANTE = 3;
-	private static final String FILE_NAME = "sauvegarde",
+	private static final int NB_LIGNES = 4, NB_COLONNES = 4, PUISSANCE_GAGNANTE = 11;
+	private static final String FILE_NAME = "sauvegarde.2048",
 			AIDE_TEXT = "texte";
 	private Jeu2048 jeu2048;
 	
-	public Interface2048()
+	public LigneCommande2048()
 	{
 		jeu2048 = Jeu2048.restaurer(FILE_NAME);
 		if (jeu2048 == null)
-			jeu2048 = new Jeu2048(NB_LIGNES, NB_COLONNES, PUISSANCE_GAGNANTE);  
+			jeu2048 = new Jeu2048(NB_LIGNES, NB_COLONNES, PUISSANCE_GAGNANTE);
+		jeu2048.setCoordonneesListener(getListener());
+	}
+	
+	private Listener<Coordonnees> getListener()
+	{
+		return new Listener<Coordonnees>()
+		{
+			@Override
+			public void actionPerformed(Coordonnees action)
+			{
+				System.out.println(action);
+			}
+		};
 	}
 	
 	private String saisieString(String message)
@@ -46,7 +61,6 @@ public class Interface2048
 	{
 		return saisieString(message).charAt(0);
 	}
-
 	
 	public void modeTriche()
 	{
@@ -62,16 +76,15 @@ public class Interface2048
 			System.out.println("Aucune opération à annuler.");
 	}
 	
+	public void reinitialiser()
+	{
+		jeu2048.reinitialiser();
+	}
+	
 	public void retablir()
 	{
 		if (!jeu2048.retablir())
 			System.out.println("Aucune opération à retablir.");
-	}
-
-
-	public void reinitialiser()
-	{
-		jeu2048.reinitialiser();
 	}
 
 	public void quitter()
@@ -80,11 +93,6 @@ public class Interface2048
 			System.out.println("Impossible de sauvegarder la partie.");
 		System.out.println("Au revoir !");
 		System.exit(0);
-	}
-
-	public void aide()
-	{
-		System.out.println(AIDE_TEXT);
 	}
 
 	public void jouer()
@@ -102,8 +110,8 @@ public class Interface2048
 				case ANNULER : annuler() ; break;
 				case RETABLIR : retablir() ; break;
 				case QUITTER : quitter() ; break;
-				case REINITIALISER : reinitialiser() ; break;
-				case AIDE : aide() ; break;
+				case REINITIALISER : reinitialiser(); break;
+				case AIDE : System.out.println(AIDE_TEXT); break;
 				default : System.out.println("Erreur de saisie");
 			}
 			if (jeu2048.gagne())
@@ -115,7 +123,7 @@ public class Interface2048
 	
 	public static void main(String[] args)
 	{
-		Interface2048 deuxMilleQuaranteHuit = new Interface2048();
+		LigneCommande2048 deuxMilleQuaranteHuit = new LigneCommande2048();
 		deuxMilleQuaranteHuit.jouer();
 	}
 }

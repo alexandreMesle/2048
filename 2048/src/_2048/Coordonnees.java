@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Coordonnees implements Serializable
+public class Coordonnees implements Serializable, Comparable<Coordonnees>
 {
 	private static final long serialVersionUID = 8976684575490475011L;
 	private int ligne, colonne;
@@ -35,8 +35,8 @@ public class Coordonnees implements Serializable
 
 	boolean verifie()
 	{
-		return 0 <= ligne && ligne < grille.getNbLignes() && 0 <= colonne
-				&& colonne < grille.getNbColonnes();
+		return 0 <= ligne && ligne < grille.getNbLignes() && 
+			0 <= colonne && colonne < grille.getNbColonnes();
 	}
 
 	boolean estVide()
@@ -68,6 +68,21 @@ public class Coordonnees implements Serializable
 	public String toString()
 	{
 		return "(" + ligne + ", " + colonne + ")";
+	}
+
+	@Override
+	public int compareTo(Coordonnees autre)
+	{
+		System.out.println("compareTo" + this + " ? " + autre);
+		if (getLigne() < autre.getLigne())
+			return -1;
+		if (getLigne() > autre.getLigne())
+			return 1;
+		if (getColonne() < autre.getColonne())
+			return -1;
+		if (getColonne() > autre.getColonne())
+			return 1;		
+		return 0;
 	}
 }
 

@@ -9,7 +9,7 @@ class Tour implements Serializable
 	private int nbThreads = 0;
 	private Stack<Operation> operations = new Stack<>(), operationsRetablir = new Stack<>();
 	
-	boolean getBouge()
+	boolean getMouvementEffectue()
 	{
 		return !operations.isEmpty();
 	}
@@ -65,7 +65,7 @@ abstract class Operation implements Serializable
 	private static final long serialVersionUID = 4452112939719850396L;
 	protected int score;
 	protected Grille grille;
-	protected boolean operationGagnante = false;
+	protected boolean operationGagnante = false, changeScore = false;
 	
 	Operation (Grille grille, int score)
 	{
@@ -73,20 +73,37 @@ abstract class Operation implements Serializable
 		this.grille = grille;
 	}
 	
+	protected void pause()
+	{
+		try
+		{
+			Thread.sleep(Grille.TEMPS_ATTENTE);
+		} catch (InterruptedException e){}
+		
+	}
+	
 	boolean executer()
 	{
-		grille.ajouteScore(score);
-		if (operationGagnante)
-			grille.setValeurGagnanteAtteinte(true);
+		if (changeScore)
+		{
+			grille.ajouteScore(score);
+			if (operationGagnante)
+				grille.setValeurGagnanteAtteinte(true);
+		}
+		pause();
 		return true;
 	}
 	
 	void annuler()
 	{
-		grille.enleveScore(score);		
-		if (operationGagnante)
-			grille.setValeurGagnanteAtteinte(false);
-	}
+		if (changeScore)
+		{
+			grille.enleveScore(score);
+			if (operationGagnante)
+				grille.setValeurGagnanteAtteinte(false);
+		}
+		pause();
+}
 	
 	void setOperationGagnante()
 	{
@@ -169,6 +186,7 @@ class Fusion extends Operation
 		coordonneesDestination = source.getCoordonnees().plus(direction);
 		destination = grille.get(coordonneesDestination);
 		tuile = new TuileFusionnee(grille, source, destination);
+		changeScore = true;
 	}
 	
 	boolean executer()
