@@ -32,6 +32,21 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		this(nbLignes, nbColonnes, 11);
 	}
 
+	protected void setGrille(Grille grille)
+	{
+		this.grille = grille;
+	}
+
+	protected void setPuissanceGagnante(int puissanceGagnante)
+	{
+		this.puissanceGagnante = puissanceGagnante;
+	}
+
+	protected void setScoreListener(Listener<Integer> scoreListener)
+	{
+		this.scoreListener = scoreListener;
+	}
+
 	public void reinitialiser()
 	{
 		grille = new Grille(nbLignes, nbColonnes, puissanceGagnante);
@@ -39,7 +54,6 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		grille.setScoreListener(scoreListener);
 		grille.setAnnulableListener(annulableListener);
 		grille.setRetablissableListener(retablissableListener);		
-		System.out.println("réinitialisé !!!");
 	}
 	
 	public boolean gauche()
@@ -80,6 +94,16 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 	public int getNbColonnes()
 	{
 		return grille.getNbColonnes();
+	}
+	
+	public void setNbLignes(int nbLignes)
+	{
+		this.nbLignes = nbLignes;
+	}
+
+	public void setNbColonnes(int nbColonnes)
+	{
+		this.nbColonnes = nbColonnes;
 	}
 	
 	public Tuile get(Coordonnees coordonnees)
