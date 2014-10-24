@@ -16,7 +16,7 @@ class Grille implements Serializable, Iterable<Coordonnees>
 			DROITE = new Direction(this, 0, 1),
 			HAUT = new Direction(this, -1, 0),
 			BAS = new Direction(this, 1, 0);
-	final static int TEMPS_ATTENTE = 10;
+	final static int TEMPS_ATTENTE = 5;
 	private int nbLignes, nbColonnes;
 	private Map<Coordonnees, Tuile> tuiles = new HashMap<>();
 	private List<Coordonnees> coordonnees = new LinkedList<>();
