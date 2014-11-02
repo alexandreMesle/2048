@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+// TODO utiliser un tri topologique pour les déplacements
+// TODO fusionner les deux historiques
+
 class Grille implements Serializable, Iterable<Coordonnees>
 {
 	private static final long serialVersionUID = -1393369598429605704L;

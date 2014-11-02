@@ -8,7 +8,9 @@ import java.awt.MenuItem;
 import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -26,6 +28,8 @@ import _2048.Coordonnees;
 import _2048.Jeu2048;
 import _2048.Listener;
 import _2048.Tuile;
+
+// TODO enlever les alt+
 
 public class JFrame2048
 {
@@ -116,6 +120,7 @@ public class JFrame2048
 		panel.add(getScorePanel());
 		panel.add(getGrillePanel());
 		panel.add(getDirectionPanel());
+//		panel.addKeyListener(getKeyListener());
 		return panel;
 	}
 	
@@ -134,6 +139,7 @@ public class JFrame2048
 			grillePanel.add(label);
 			labels.put(coordonnees, label);
 		}
+//		grillePanel.addKeyListener(getKeyListener());
 		return grillePanel;
 	}
 	
@@ -144,6 +150,7 @@ public class JFrame2048
 		JLabel label = new JLabel("Score : " + jeu2048.getScore());
 		jeu2048.setScoreCoordonneesListener(getScoreListener(label));
 		panel.add(label);		
+//		panel.addKeyListener(getKeyListener());
 		return panel;
 	}
 
@@ -371,6 +378,18 @@ public class JFrame2048
 				sauvegarder();
 				System.exit(0);
 			}			
+		};
+	}
+	
+	private KeyListener getKeyListener()
+	{
+		return new KeyAdapter()
+		{
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				System.out.println("key pressed" + e.getKeyCode());
+			}
 		};
 	}
 	
