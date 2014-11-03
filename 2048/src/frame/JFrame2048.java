@@ -31,6 +31,7 @@ import _2048.Tuile;
 
 // TODO enlever les alt+
 // TODO meta-interface graphique
+// TODO rendre thread safe 
 
 public class JFrame2048
 {

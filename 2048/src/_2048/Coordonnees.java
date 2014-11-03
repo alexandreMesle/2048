@@ -1,8 +1,6 @@
 package _2048;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Coordonnees implements Serializable, Comparable<Coordonnees>
 {
@@ -33,6 +31,11 @@ public class Coordonnees implements Serializable, Comparable<Coordonnees>
 				+ autre.getColonne());
 	}
 
+	int produitScalaire(Coordonnees autre)
+	{
+		return ligne * autre.ligne + colonne * autre.colonne; 
+	}
+	
 	boolean verifie()
 	{
 		return 0 <= ligne && ligne < grille.getNbLignes() && 
@@ -105,36 +108,36 @@ class Direction extends Coordonnees
 		return new Direction(grille, -getLigne(), -getColonne());
 	}
 
-	private int depart(int coordonnee, int limite)
-	{
-		if (coordonnee <= 0)
-			return 0;
-		return (limite - 1);
-	}
-
-	private Coordonnees depart()
-	{
-		return new Coordonnees(grille,
-				depart(getLigne(), grille.getNbLignes()), depart(getColonne(),
-						grille.getNbColonnes()));
-	}
-
-	private Direction delta()
-	{
-		return new Direction(grille, (getColonne() != 0) ? 1 : 0,
-				(getLigne() != 0) ? 1 : 0);
-	}
-
-	public List<Coordonnees> bord()
-	{
-		List<Coordonnees> liste = new ArrayList<>();
-		Coordonnees point = depart();
-		Direction delta = delta();
-		while (point.verifie())
-		{
-			liste.add(point);
-			point = point.plus(delta);
-		}
-		return liste;
-	}
+//	private int depart(int coordonnee, int limite)
+//	{
+//		if (coordonnee <= 0)
+//			return 0;
+//		return (limite - 1);
+//	}
+//
+//	private Coordonnees depart()
+//	{
+//		return new Coordonnees(grille,
+//				depart(getLigne(), grille.getNbLignes()), depart(getColonne(),
+//						grille.getNbColonnes()));
+//	}
+//
+//	private Direction delta()
+//	{
+//		return new Direction(grille, (getColonne() != 0) ? 1 : 0,
+//				(getLigne() != 0) ? 1 : 0);
+//	}
+//
+//	public List<Coordonnees> bord()
+//	{
+//		List<Coordonnees> liste = new ArrayList<>();
+//		Coordonnees point = depart();
+//		Direction delta = delta();
+//		while (point.verifie())
+//		{
+//			liste.add(point);
+//			point = point.plus(delta);
+//		}
+//		return liste;
+//	}
 }
