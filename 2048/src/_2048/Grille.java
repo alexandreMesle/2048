@@ -2,14 +2,16 @@ package _2048;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Stack;
 
-// TODO utiliser un tri topologique pour les dÃ©placements
+// TODO utiliser un tri topologique pour les déplacements
 // TODO fusionner les deux historiques
 
 class Grille implements Serializable, Iterable<Coordonnees>
@@ -200,52 +202,65 @@ class Grille implements Serializable, Iterable<Coordonnees>
 		return getTourActuel().executer(operation);
 	}
 	
-	void mouvement(final Direction direction, final Coordonnees source)
-	{
-		final Direction oppose = direction.oppose();
-		Runnable r = new Runnable()
-		{
-			public void run()
-			{
-				getTourActuel().ajouteThread();
-				Coordonnees maCase = source;
-				while(maCase.verifie())
-				{
-					if (!estVide(maCase))
-						get(maCase).mouvement(direction);
-					maCase = maCase.plus(oppose);
-					try{Thread.sleep(TEMPS_ATTENTE);}
-					catch (InterruptedException e){e.printStackTrace();}
-				}
-				getTourActuel().enleveThread();
-				synchronized(Grille.this)
-				{
-					Grille.this.notifyAll();
-				}
-			}
-		};
-		(new Thread(r)).start();
-	}	
-	
-	boolean mouvement(Direction direction)
+//	void mouvement(final Direction direction, final Coordonnees source)
+//	{
+//		final Direction oppose = direction.oppose();
+//		Runnable r = new Runnable()
+//		{
+//			public void run()
+//			{
+//				getTourActuel().ajouteThread();
+//				Coordonnees maCase = source;
+//				while(maCase.verifie())
+//				{
+//					if (!estVide(maCase))
+//						get(maCase).mouvement(direction);
+//					maCase = maCase.plus(oppose);
+//					try{Thread.sleep(TEMPS_ATTENTE);}
+//					catch (InterruptedException e){e.printStackTrace();}
+//				}
+//				getTourActuel().enleveThread();
+//				synchronized(Grille.this)
+//				{
+//					Grille.this.notifyAll();
+//				}
+//			}
+//		};
+//		(new Thread(r)).start();
+//	}	
+//	
+	boolean mouvement(final Direction direction)
 	{		
 		ajouteTour();
-		for (Coordonnees c : direction.bord())
-			mouvement(direction, c);
-		do
-		{
-			try
+		List<Tuile> listeDeTuiles = new ArrayList<Tuile>(tuiles.values());
+		Comparator<Tuile> comparateur = new Comparator<Tuile>() 
 			{
-				synchronized (this)
-				{
-					wait();
-				}
-			} catch (InterruptedException e)
+			@Override
+			public int compare(Tuile tuile1, Tuile tuile2) 
 			{
-				e.printStackTrace();
+				return tuile2.getCoordonnees().produitScalaire(direction) -
+						tuile1.getCoordonnees().produitScalaire(direction);
 			}
-		} 
-		while (getTourActuel().threadsEnCours());
+		};
+		Collections.sort(listeDeTuiles, comparateur);
+		for (Tuile t : listeDeTuiles)
+			t.mouvement(direction);
+//		for (Coordonnees c : direction.bord())
+//			mouvement(direction, c);
+//		do
+//		{
+//			try
+//			{
+//				synchronized (this)
+//				{
+//					wait();
+//				}
+//			} catch (InterruptedException e)
+//			{
+//				e.printStackTrace();
+//			}
+//		} 
+//		while (getTourActuel().threadsEnCours());
 		if (getTourActuel().getMouvementEffectue())
 			executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
 		actionPerformedHistorique();

@@ -30,6 +30,7 @@ import _2048.Listener;
 import _2048.Tuile;
 
 // TODO enlever les alt+
+// TODO rendre thread safe 
 
 public class JFrame2048
 {

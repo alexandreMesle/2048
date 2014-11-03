@@ -33,7 +33,7 @@ public class LigneCommande2048
 			@Override
 			public void actionPerformed(Coordonnees action)
 			{
-				System.out.println(action);
+				//System.out.println(action);
 			}
 		};
 	}
