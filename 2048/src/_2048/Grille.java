@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Stack;
 
-// TODO utiliser un tri topologique pour les déplacements
 // TODO fusionner les deux historiques
 
 class Grille implements Serializable, Iterable<Coordonnees>
@@ -28,9 +27,10 @@ class Grille implements Serializable, Iterable<Coordonnees>
 	private int valeurGagnante = 2048;
 	private boolean valeurGagnanteAtteinte = false;
 	private int score = 0;
-	private Stack<Tour> tours = new Stack<>(), toursRetablir = new Stack<>();
+	private Historique<Tour> historique = new Historique<>();
 	private transient Listener<Coordonnees> coordonneesListener = null;
 	private transient Listener<Integer> scoreListener = null;
+	transient private Listener<Boolean> transactionListener = null;
 	private transient Listener<Boolean> annulableListener = null, 
 			retablissableListener = null;
 	
@@ -42,7 +42,7 @@ class Grille implements Serializable, Iterable<Coordonnees>
 		for (int i = 0 ;  i < nbLignes; i++)
 			for (int j = 0 ; j < nbColonnes ; j++)
 				coordonnees.add(new Coordonnees(this, i, j));
-		ajouteTour();
+		commenceTour();
 		executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
 	}
 	
@@ -91,7 +91,7 @@ class Grille implements Serializable, Iterable<Coordonnees>
 	
 	boolean detruireTuile(Coordonnees coordonnees)
 	{
-		ajouteTour();
+		commenceTour();
 		return executer(new Destruction(this, coordonnees));
 	}
 
@@ -147,31 +147,19 @@ class Grille implements Serializable, Iterable<Coordonnees>
 		return tuiles.size() == 1;
 	}
 	
-	private void ajouteTour()
+	private void commenceTour()
 	{
-		tours.add(new Tour());
-		toursRetablir.clear();		
+		historique.ajouter(new Tour());
 	}
-	
-	private boolean annulable()
-	{
-		return tours.size() != 1;
-	}
-
-	private boolean retablissable()
-	{
-		return !toursRetablir.isEmpty();
-	}
-
 	
 	boolean annuler()
 	{
-		if (annulable())
+		if (historique.annulable())
 		{
-			getTourActuel().annuler();
-			toursRetablir.add(getTourActuel());
-			tours.pop();
+			actionPerformedTransaction(false);
+			historique.annuler();
 			actionPerformedHistorique();
+			actionPerformedTransaction(true);
 			return true;
 		}
 		else
@@ -180,12 +168,12 @@ class Grille implements Serializable, Iterable<Coordonnees>
 
 	boolean retablir()
 	{
-		if (retablissable())
+		if (historique.retablissable())
 		{
-			tours.add(toursRetablir.peek());
-			toursRetablir.pop();
-			tours.peek().retablir();
+			actionPerformedTransaction(false);
+			historique.retablir();
 			actionPerformedHistorique();
+			actionPerformedTransaction(true);
 			return true;
 		}
 		else
@@ -194,7 +182,7 @@ class Grille implements Serializable, Iterable<Coordonnees>
 
 	Tour getTourActuel()
 	{
-		return tours.peek();
+		return historique.getEvenementEnCours();
 	}
 	
 	boolean executer(Operation operation)
@@ -202,68 +190,32 @@ class Grille implements Serializable, Iterable<Coordonnees>
 		return getTourActuel().executer(operation);
 	}
 	
-//	void mouvement(final Direction direction, final Coordonnees source)
-//	{
-//		final Direction oppose = direction.oppose();
-//		Runnable r = new Runnable()
-//		{
-//			public void run()
-//			{
-//				getTourActuel().ajouteThread();
-//				Coordonnees maCase = source;
-//				while(maCase.verifie())
-//				{
-//					if (!estVide(maCase))
-//						get(maCase).mouvement(direction);
-//					maCase = maCase.plus(oppose);
-//					try{Thread.sleep(TEMPS_ATTENTE);}
-//					catch (InterruptedException e){e.printStackTrace();}
-//				}
-//				getTourActuel().enleveThread();
-//				synchronized(Grille.this)
-//				{
-//					Grille.this.notifyAll();
-//				}
-//			}
-//		};
-//		(new Thread(r)).start();
-//	}	
-//	
-	boolean mouvement(final Direction direction)
+	Comparator<Tuile> getComparateur(final Direction direction)
+	{
+		return new Comparator<Tuile>() 
+				{
+				@Override
+				public int compare(Tuile tuile1, Tuile tuile2) 
+				{
+					return tuile2.getCoordonnees().produitScalaire(direction) -
+							tuile1.getCoordonnees().produitScalaire(direction);
+				}
+			};
+	}
+	
+	boolean mouvement(Direction direction)
 	{		
-		ajouteTour();
+		actionPerformedTransaction(false);
+		commenceTour();
 		List<Tuile> listeDeTuiles = new ArrayList<Tuile>(tuiles.values());
-		Comparator<Tuile> comparateur = new Comparator<Tuile>() 
-			{
-			@Override
-			public int compare(Tuile tuile1, Tuile tuile2) 
-			{
-				return tuile2.getCoordonnees().produitScalaire(direction) -
-						tuile1.getCoordonnees().produitScalaire(direction);
-			}
-		};
+		Comparator<Tuile> comparateur = getComparateur(direction);
 		Collections.sort(listeDeTuiles, comparateur);
 		for (Tuile t : listeDeTuiles)
 			t.mouvement(direction);
-//		for (Coordonnees c : direction.bord())
-//			mouvement(direction, c);
-//		do
-//		{
-//			try
-//			{
-//				synchronized (this)
-//				{
-//					wait();
-//				}
-//			} catch (InterruptedException e)
-//			{
-//				e.printStackTrace();
-//			}
-//		} 
-//		while (getTourActuel().threadsEnCours());
 		if (getTourActuel().getMouvementEffectue())
 			executer(new Creation(this, coordonneesAleatoires(), valeurAleatoire()));
 		actionPerformedHistorique();
+		actionPerformedTransaction(true);
 		return getTourActuel().getMouvementEffectue();
 	}
 	
@@ -322,10 +274,21 @@ class Grille implements Serializable, Iterable<Coordonnees>
 				actionPerformed(coordonnees);
 	}
 	
+	void setTransactionListener(Listener<Boolean> listener)
+	{
+		this.transactionListener = listener;
+	}
+	
 	void actionPerformed(Coordonnees coordonnees)
 	{
 		if (coordonneesListener != null && coordonnees != null)
 			coordonneesListener.actionPerformed(coordonnees);	
+	}
+
+	void actionPerformedTransaction(boolean lock)
+	{
+		if (transactionListener != null)
+			transactionListener.actionPerformed(lock);
 	}
 
 	void setScoreListener(Listener<Integer> listener)
@@ -356,9 +319,9 @@ class Grille implements Serializable, Iterable<Coordonnees>
 	void actionPerformedHistorique()
 	{
 		if (annulableListener != null)
-			annulableListener.actionPerformed(annulable());
+			annulableListener.actionPerformed(historique.annulable());
 		if (retablissableListener != null)
-			retablissableListener.actionPerformed(retablissable());
+			retablissableListener.actionPerformed(historique.retablissable());
 	}
 
 	@Override

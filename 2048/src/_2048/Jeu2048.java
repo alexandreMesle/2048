@@ -13,11 +13,11 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 	private static final long serialVersionUID = 8905215052383616386L;
 	private Grille grille;
 	private int nbLignes, nbColonnes, puissanceGagnante;
+	transient private Listener<Boolean> transactionListener = null;
 	transient private Listener<Coordonnees> coordonneesListener = null;
 	transient private Listener<Integer> scoreListener = null;
 	transient private Listener<Boolean> annulableListener = null, 
-			retablissableListener;
-	
+			retablissableListener;	
 	
 	public Jeu2048(int nbLignes, int nbColonnes, int puissanceGagnante)
 	{
@@ -32,25 +32,21 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		this(nbLignes, nbColonnes, 11);
 	}
 
-	protected void setGrille(Grille grille)
-	{
-		this.grille = grille;
-	}
-
-	protected void setPuissanceGagnante(int puissanceGagnante)
-	{
-		this.puissanceGagnante = puissanceGagnante;
-	}
-
-	protected void setScoreListener(Listener<Integer> scoreListener)
-	{
-		this.scoreListener = scoreListener;
-	}
+//	private void setGrille(Grille grille)
+//	{
+//		this.grille = grille;
+//	}
+//
+//	private  void setPuissanceGagnante(int puissanceGagnante)
+//	{
+//		this.puissanceGagnante = puissanceGagnante;
+//	}
 
 	public void reinitialiser()
 	{
 		grille = new Grille(nbLignes, nbColonnes, puissanceGagnante);
 		grille.setCoordonneesListener(coordonneesListener);
+		grille.setTransactionListener(transactionListener);
 		grille.setScoreListener(scoreListener);
 		grille.setAnnulableListener(annulableListener);
 		grille.setRetablissableListener(retablissableListener);		
@@ -187,12 +183,24 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		grille.setCoordonneesListener(listener);
 	}
 	
-	public void setScoreCoordonneesListener(Listener<Integer> listener)
-	{
-		scoreListener = listener;
-		grille.setScoreListener(listener);
-	}
+//	public void setScoreCoordonneesListener(Listener<Integer> listener)
+//	{
+//		scoreListener = listener;
+//		grille.setScoreListener(listener);
+//	}
 	
+	public void setScoreListener(Listener<Integer> scoreListener)
+	{
+		this.scoreListener = scoreListener;
+		grille.setScoreListener(scoreListener);
+	}
+
+	public void setTransactionListener(Listener<Boolean> transactionListener)
+	{
+		this.transactionListener = transactionListener;
+		grille.setTransactionListener(transactionListener);
+	}
+
 	public void setAnnulableListener(Listener<Boolean> listener)
 	{
 		annulableListener = listener;

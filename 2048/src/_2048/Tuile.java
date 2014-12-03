@@ -52,7 +52,8 @@ public class Tuile implements Serializable
 	
 	int distance(Tuile autre)
 	{
-		return getCoordonnees().distance(autre.getCoordonnees());
+		return getCoordonnees().distance(
+				autre.getCoordonnees());
 	}
 	
 	@Override

@@ -8,9 +8,7 @@ import java.awt.MenuItem;
 import java.awt.MenuShortcut;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -31,7 +29,8 @@ import _2048.Tuile;
 
 // TODO enlever les alt+
 // TODO meta-interface graphique
-// TODO rendre thread safe 
+// TODO permettre la destruction 
+// TODO message victoire
 
 public class JFrame2048
 {
@@ -123,6 +122,7 @@ public class JFrame2048
 		panel.add(getGrillePanel());
 		panel.add(getDirectionPanel());
 //		panel.addKeyListener(getKeyListener());
+		jeu2048.setTransactionListener(getTransactionListener());
 		return panel;
 	}
 	
@@ -150,7 +150,7 @@ public class JFrame2048
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout());
 		JLabel label = new JLabel("Score : " + jeu2048.getScore());
-		jeu2048.setScoreCoordonneesListener(getScoreListener(label));
+		jeu2048.setScoreListener(getScoreListener(label));
 		panel.add(label);		
 //		panel.addKeyListener(getKeyListener());
 		return panel;
@@ -179,7 +179,7 @@ public class JFrame2048
 					@Override
 					public void run()
 					{
-						enableFenetre(false);
+						//enableFenetre(false);
 						switch (direction)
 						{
 						case HAUT: jeu2048.haut() ; break;
@@ -188,7 +188,7 @@ public class JFrame2048
 						case DROITE: jeu2048.droite() ; break;
 						default: System.out.println("erreur !");
 						}
-						enableFenetre(true);
+						//enableFenetre(true);
 					}
 				};
 				(new Thread(r)).start();
@@ -306,15 +306,27 @@ public class JFrame2048
 					@Override
 					public void run()
 					{
-						enableFenetre(false);
+						//enableFenetre(false);
 						if (annuler)
 							jeu2048.annuler();
 						else
 							jeu2048.retablir();
-						enableFenetre(true);
+						//enableFenetre(true);
 					}
 				};
 				(new Thread(r)).start();
+			}
+		};
+	}
+	
+	private Listener<Boolean> getTransactionListener()
+	{
+		return new Listener<Boolean>()
+		{
+			@Override
+			public void actionPerformed(Boolean lock)
+			{
+				enableFenetre(lock);
 			}
 		};
 	}
@@ -383,18 +395,18 @@ public class JFrame2048
 		};
 	}
 	
-	private KeyListener getKeyListener()
-	{
-		return new KeyAdapter()
-		{
-			@Override
-			public void keyPressed(KeyEvent e)
-			{
-				System.out.println("key pressed" + e.getKeyCode());
-			}
-		};
-	}
-	
+//	private KeyListener getKeyListener()
+//	{
+//		return new KeyAdapter()
+//		{
+//			@Override
+//			public void keyPressed(KeyEvent e)
+//			{
+//				System.out.println("key pressed" + e.getKeyCode());
+//			}
+//		};
+//	}
+//	
 	public int getNbLignes()
 	{
 		return jeu2048.getNbLignes();
