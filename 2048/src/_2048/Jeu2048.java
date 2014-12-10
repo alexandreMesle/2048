@@ -11,7 +11,7 @@ import java.util.Iterator;
 public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 {
 	private static final long serialVersionUID = 8905215052383616386L;
-	private Grille grille;
+	private Partie2048 partie2048;
 	private int nbLignes, nbColonnes, puissanceGagnante;
 	transient private Listener<Boolean> transactionListener = null;
 	transient private Listener<Coordonnees> coordonneesListener = null;
@@ -44,52 +44,52 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 
 	public void reinitialiser()
 	{
-		grille = new Grille(nbLignes, nbColonnes, puissanceGagnante);
-		grille.setCoordonneesListener(coordonneesListener);
-		grille.setTransactionListener(transactionListener);
-		grille.setScoreListener(scoreListener);
-		grille.setAnnulableListener(annulableListener);
-		grille.setRetablissableListener(retablissableListener);		
+		partie2048 = new Partie2048(nbLignes, nbColonnes, puissanceGagnante);
+		partie2048.setCoordonneesListener(coordonneesListener);
+		partie2048.setTransactionListener(transactionListener);
+		partie2048.setScoreListener(scoreListener);
+		partie2048.setAnnulableListener(annulableListener);
+		partie2048.setRetablissableListener(retablissableListener);		
 	}
 	
 	public boolean gauche()
 	{
-		return grille.mouvement(grille.GAUCHE);
+		return partie2048.mouvement(partie2048.GAUCHE);
 	}
 
 	public boolean droite()
 	{
-		return grille.mouvement(grille.DROITE);
+		return partie2048.mouvement(partie2048.DROITE);
 	}
 
 	public boolean haut()
 	{
-		return grille.mouvement(grille.HAUT);
+		return partie2048.mouvement(partie2048.HAUT);
 	}
 
 	public boolean bas()
 	{
-		return grille.mouvement(grille.BAS);
+		return partie2048.mouvement(partie2048.BAS);
 	}
 
 	public boolean perd()
 	{
-		return grille.perd();
+		return partie2048.perd();
 	}
 	
 	public boolean gagne()
 	{
-		return grille.gagne();
+		return partie2048.gagne();
 	}
 	
 	public int getNbLignes()
 	{
-		return grille.getNbLignes();
+		return partie2048.getNbLignes();
 	}
 	
 	public int getNbColonnes()
 	{
-		return grille.getNbColonnes();
+		return partie2048.getNbColonnes();
 	}
 	
 	public void setNbLignes(int nbLignes)
@@ -104,27 +104,28 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 	
 	public Tuile get(Coordonnees coordonnees)
 	{
-		return grille.get(coordonnees);
+		return partie2048.get(coordonnees);
 	}
 	
 	public int getScore()
 	{
-		return grille.getScore();
+		return partie2048.getScore();
 	}
 	
 	public boolean detruireTuile(int ligne, int colonne)
 	{
-		return grille.detruireTuile(new Coordonnees(grille, ligne, colonne));
+//		return partie2048.detruireTuile(new Coordonnees(partie2048, ligne, colonne));
+		return partie2048.detruireTuile(ligne, colonne);
 	}
 	
 	public boolean annuler()
 	{
-		return grille.annuler();
+		return partie2048.annuler();
 	}
 	
 	public boolean retablir()
 	{
-		return grille.retablir();
+		return partie2048.retablir();
 	}
 	
 	public boolean sauvegarder(String fileName) 
@@ -180,7 +181,7 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 	public void setCoordonneesListener(Listener<Coordonnees> listener)
 	{
 		coordonneesListener = listener;
-		grille.setCoordonneesListener(listener);
+		partie2048.setCoordonneesListener(listener);
 	}
 	
 //	public void setScoreCoordonneesListener(Listener<Integer> listener)
@@ -192,35 +193,35 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 	public void setScoreListener(Listener<Integer> scoreListener)
 	{
 		this.scoreListener = scoreListener;
-		grille.setScoreListener(scoreListener);
+		partie2048.setScoreListener(scoreListener);
 	}
 
 	public void setTransactionListener(Listener<Boolean> transactionListener)
 	{
 		this.transactionListener = transactionListener;
-		grille.setTransactionListener(transactionListener);
+		partie2048.setTransactionListener(transactionListener);
 	}
 
 	public void setAnnulableListener(Listener<Boolean> listener)
 	{
 		annulableListener = listener;
-		grille.setAnnulableListener(listener);
+		partie2048.setAnnulableListener(listener);
 	}
 	
 	public void setRetablissableListener(Listener<Boolean> listener)
 	{
 		retablissableListener = listener;
-		grille.setRetablissableListener(listener);
+		partie2048.setRetablissableListener(listener);
 	}
 	
 	public String toString()
 	{
-		return grille.toString();
+		return partie2048.toString();
 	}
 
 	@Override
 	public Iterator<Coordonnees> iterator()
 	{
-		return grille.iterator();
+		return partie2048.iterator();
 	}
 }

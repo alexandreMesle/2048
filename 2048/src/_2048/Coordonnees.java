@@ -76,68 +76,9 @@ public class Coordonnees implements Serializable, Comparable<Coordonnees>
 	@Override
 	public int compareTo(Coordonnees autre)
 	{
-		System.out.println("compareTo" + this + " ? " + autre);
-		if (getLigne() < autre.getLigne())
-			return -1;
-		if (getLigne() > autre.getLigne())
-			return 1;
-		if (getColonne() < autre.getColonne())
-			return -1;
-		if (getColonne() > autre.getColonne())
-			return 1;		
-		return 0;
+		//System.out.println("compareTo" + this + " ? " + autre);
+		if (getLigne() == autre.getLigne())
+			return getColonne() - autre.getColonne();
+		return getLigne() - autre.getLigne();
 	}
-}
-
-class Direction extends Coordonnees
-{
-	private static final long serialVersionUID = -2309155139265325090L;
-
-	Direction(Grille grille, Coordonnees direction)
-	{
-		this(grille, direction.getLigne(), direction.getColonne());
-	}
-
-	Direction(Grille grille, int ligne, int colonne)
-	{
-		super(grille, ligne, colonne);
-	}
-
-	public Direction oppose()
-	{
-		return new Direction(grille, -getLigne(), -getColonne());
-	}
-
-//	private int depart(int coordonnee, int limite)
-//	{
-//		if (coordonnee <= 0)
-//			return 0;
-//		return (limite - 1);
-//	}
-//
-//	private Coordonnees depart()
-//	{
-//		return new Coordonnees(grille,
-//				depart(getLigne(), grille.getNbLignes()), depart(getColonne(),
-//						grille.getNbColonnes()));
-//	}
-//
-//	private Direction delta()
-//	{
-//		return new Direction(grille, (getColonne() != 0) ? 1 : 0,
-//				(getLigne() != 0) ? 1 : 0);
-//	}
-//
-//	public List<Coordonnees> bord()
-//	{
-//		List<Coordonnees> liste = new ArrayList<>();
-//		Coordonnees point = depart();
-//		Direction delta = delta();
-//		while (point.verifie())
-//		{
-//			liste.add(point);
-//			point = point.plus(delta);
-//		}
-//		return liste;
-//	}
 }

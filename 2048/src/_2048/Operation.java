@@ -6,20 +6,20 @@ abstract class Operation implements Evenement, Serializable
 {
 	private static final long serialVersionUID = 4452112939719850396L;
 	protected int score;
-	protected Grille grille;
+	protected Partie2048 partie2048;
 	protected boolean operationGagnante = false, changeScore = false;
 	
-	Operation (Grille grille, int score)
+	Operation (Partie2048 partie2048, int score)
 	{
 		this.score = score;
-		this.grille = grille;
+		this.partie2048 = partie2048;
 	}
 	
 	protected void pause()
 	{
 		try
 		{
-			Thread.sleep(Grille.TEMPS_ATTENTE);
+			Thread.sleep(Partie2048.TEMPS_ATTENTE);
 		} 
 		catch (InterruptedException e){}
 		
@@ -29,9 +29,9 @@ abstract class Operation implements Evenement, Serializable
 	{
 		if (changeScore)
 		{
-			grille.ajouteScore(score);
+			partie2048.ajouteScore(score);
 			if (operationGagnante)
-				grille.setValeurGagnanteAtteinte(true);
+				partie2048.setValeurGagnanteAtteinte(true);
 		}
 		pause();
 		return true;
@@ -41,9 +41,9 @@ abstract class Operation implements Evenement, Serializable
 	{
 		if (changeScore)
 		{
-			grille.enleveScore(score);
+			partie2048.enleveScore(score);
 			if (operationGagnante)
-				grille.setValeurGagnanteAtteinte(false);
+				partie2048.setValeurGagnanteAtteinte(false);
 		}
 		pause();
 	}

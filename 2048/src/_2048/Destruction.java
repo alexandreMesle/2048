@@ -6,18 +6,18 @@ class Destruction extends Operation
 	private Coordonnees coordonnees;
 	private Tuile tuile;
 	
-	Destruction(Grille grille, Coordonnees coordonnees)
+	Destruction(Partie2048 partie2048, Coordonnees coordonnees)
 	{
-		super(grille, 0);
+		super(partie2048, 0);
 		this.coordonnees = coordonnees;
-		this.tuile = grille.get(coordonnees);
+		this.tuile = partie2048.getGrille().get(coordonnees);
 		if (tuile != null)
 			score = -tuile.getValeur();
 	}
 	
 	public boolean executer()
 	{
-		if (tuile != null && !grille.uneSeuleTuile())
+		if (tuile != null && !partie2048.getGrille().uneSeuleTuile())
 			tuile.setCoordonnees(null);
 		else
 			return false;

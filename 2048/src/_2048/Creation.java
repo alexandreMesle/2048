@@ -6,11 +6,11 @@ class Creation extends Operation
 	private Coordonnees coordonnees; 
 	private Tuile tuile;
 	
-	Creation(Grille grille, Coordonnees coordonnees, int valeur)
+	Creation(Partie2048 partie2048, Coordonnees coordonnees, int valeur)
 	{
-		super(grille, 0);
+		super(partie2048, 0);
 		this.coordonnees = coordonnees;
-		this.tuile = new Tuile(grille, null, valeur);
+		this.tuile = new Tuile(partie2048, null, valeur);
 	}
 
 	@Override

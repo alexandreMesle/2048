@@ -6,17 +6,17 @@ public class Tuile implements Serializable
 {
 	private static final long serialVersionUID = 8239151527953937239L;
 	final static int LARGEUR_TUILE= 5; 
-	private Grille grille;
+	private Partie2048 partie2048;
 	private Coordonnees coordonnees;
 	private int valeur;
 	private Tour tour;
 	
-	Tuile(Grille grille, Coordonnees coordonnees, int valeur)
+	Tuile(Partie2048 partie2048, Coordonnees coordonnees, int valeur)
 	{
-		this.grille = grille;
+		this.partie2048 = partie2048;
 		setCoordonnees(coordonnees);
 		this.valeur= valeur;
-		this.tour = grille.getTourActuel();
+		this.tour = partie2048.getTourActuel();
 	}
 	
 	public int getValeur()
@@ -38,16 +38,16 @@ public class Tuile implements Serializable
 	{
 		if (this.coordonnees != coordonnees)
 		{
-			grille.supprime(this);
+			partie2048.getGrille().supprime(this);
 			this.coordonnees = coordonnees;
-			grille.set(this.coordonnees, this);
+			partie2048.getGrille().set(this.coordonnees, this);
 		}
 	}
 	
 	void mouvement(Direction direction)
 	{
-		while(grille.executer(new Deplacement(grille, this, direction)));
-		grille.executer(new Fusion(grille, this, direction));
+		while(partie2048.executer(new Deplacement(partie2048, this, direction)));
+		partie2048.executer(new Fusion(partie2048, this, direction));
 	}
 	
 	int distance(Tuile autre)
@@ -67,8 +67,8 @@ class TuileFusionnee extends Tuile
 {
 	private static final long serialVersionUID = -184129757574441051L;
 
-	TuileFusionnee(Grille grille, Tuile source, Tuile destination)
+	TuileFusionnee(Partie2048 partie2048, Tuile source, Tuile destination)
 	{
-		super(grille, null, source.getValeur() * 2);
+		super(partie2048, null, source.getValeur() * 2);
 	}
 }

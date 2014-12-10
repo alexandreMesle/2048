@@ -7,14 +7,14 @@ class Fusion extends Operation
 	private Coordonnees coordonneesSource, coordonneesDestination;
 	private TuileFusionnee tuile;
 	
-	Fusion(Grille grille, Tuile source, Direction direction)
+	Fusion(Partie2048 partie2048, Tuile source, Direction direction)
 	{
-		super(grille, source.getValeur()*2);
+		super(partie2048, source.getValeur()*2);
 		this.source = source;
 		coordonneesSource = source.getCoordonnees();
 		coordonneesDestination = source.getCoordonnees().plus(direction);
-		destination = grille.get(coordonneesDestination);
-		tuile = new TuileFusionnee(grille, source, destination);
+		destination = partie2048.getGrille().get(coordonneesDestination);
+		tuile = new TuileFusionnee(partie2048, source, destination);
 		changeScore = true;
 	}
 	
@@ -22,7 +22,7 @@ class Fusion extends Operation
 	{
 		if (destination == null)
 			return false;
-		if (source.getTour() == grille.getTourActuel() || destination.getTour() == grille.getTourActuel())
+		if (source.getTour() == partie2048.getTourActuel() || destination.getTour() == partie2048.getTourActuel())
 			return false;
 		if (source.getValeur() != destination.getValeur())
 			return false;
@@ -30,7 +30,7 @@ class Fusion extends Operation
 			return false;
 		tuile.setCoordonnees(destination.getCoordonnees());
 		source.setCoordonnees(null);
-		if (!grille.gagne() && tuile.getValeur() == grille.getValeurGagnante())
+		if (!partie2048.gagne() && tuile.getValeur() == partie2048.getValeurGagnante())
 			setOperationGagnante();
 		return super.executer();
 	}

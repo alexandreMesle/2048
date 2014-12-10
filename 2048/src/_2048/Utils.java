@@ -34,4 +34,11 @@ class Utils
 	{
 		return String.format("%0" + number + "d", 0).replace("0", "" + symbol);
 	}
+	
+	static int valeurAleatoire()
+	{
+		return (Utils.nextBoolean()) ? 2 : 4;
+	}
+
+
 }

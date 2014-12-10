@@ -6,9 +6,9 @@ public class Deplacement extends Operation
 	private Coordonnees source, destination;
 	private Tuile tuile;
 
-	Deplacement(Grille grille, Tuile tuile, Direction direction)
+	Deplacement(Partie2048 partie2048, Tuile tuile, Direction direction)
 	{
-		super(grille, 0);
+		super(partie2048, 0);
 		this.tuile = tuile;
 		source = tuile.getCoordonnees();
 		destination = source.plus(direction);
