@@ -12,7 +12,7 @@ import javax.swing.SwingConstants;
 
 import _2048.Coordonnees;
 
-public class TuileLabel extends JLabel
+class TuileLabel extends JLabel
 {
 	private static final long serialVersionUID = 7712249228589591390L;
 	private Coordonnees coordonnees;

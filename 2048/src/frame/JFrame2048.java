@@ -31,16 +31,17 @@ import _2048.Tuile;
 // TODO meta-interface graphique
 // TODO permettre la destruction 
 // TODO message victoire
+// TODO séparer la gestion des événements
 
 public class JFrame2048
 {
 	private static final int DEFAULT_NB_LIGNES = 4, DEFAULT_NB_COLONNES = 4, 
 			PUISSANCE_GAGNANTE = 11, HAUT = 1, BAS = 2, DROITE = 3, GAUCHE=4;
 	private static final String FILE_NAME = "sauvegarde.2048";
-	private JFrame frame;
+	private JFrame jFrame;
 	private Jeu2048 jeu2048;
-	private Map<Coordonnees, TuileLabel> labels = new HashMap<>();
-	private JPanel grillePanel = null;
+	private Grille grille;
+	private BarreMenu menu;
 	
 	public JFrame2048()
 	{
@@ -48,63 +49,48 @@ public class JFrame2048
 		if (jeu2048 == null)
 			jeu2048 = new Jeu2048(DEFAULT_NB_LIGNES, DEFAULT_NB_COLONNES, 
 					PUISSANCE_GAGNANTE);
-		frame = new JFrame("2048");
-		frame.setContentPane(getMainPanel());
-		jeu2048.setCoordonneesListener(getCoordonneesListener());
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		frame.setResizable(false);
-		frame.addWindowListener(getWindowListener());
-		frame.setMenuBar(getMenuBar());
-		frame.pack();
+		grille = new Grille(jeu2048);
+		menu = new BarreMenu(this);
+		jFrame = new JFrame("2048");
+		jFrame.setContentPane(getMainPanel());
+		jFrame.setVisible(true);
+		jFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		jFrame.setResizable(false);
+		jFrame.addWindowListener(getWindowListener());
+		jFrame.setMenuBar(menu.getMenuBar());
+		jFrame.pack();
 	}
 	
-	private MenuBar getMenuBar()
+	Jeu2048 getJeu2048()
 	{
-		MenuBar menuBar= new MenuBar();
-		menuBar.add(getMenuJeu());
-		menuBar.add(getMenuParametres());
-		return menuBar;
+		return jeu2048;
 	}
-
-	private Menu getMenuParametres()
+	
+	JFrame getJFrame()
 	{
-		Menu menu = new Menu("Paramètres");
-		menu.add(getItemNbLignes());
-		menu.add(getItemNbColonnes());
-		return menu;
+		return jFrame;
 	}
-
-	private Menu getMenuJeu()
-	{
-		Menu menu = new Menu("Jeu");
-		menu.add(getItemQuitter());
-		menu.add(getItemReinitialiser());
-		menu.add(getItemAnnuler());
-		menu.add(getItemRetablir());
-		return menu;
-	}
-
+	
 	private void enableFenetre(boolean b)
 	{
-		frame.setEnabled(b);
+		jFrame.setEnabled(b);
 	}
 	
 	private boolean demandeConfirmation(String message)
 	{
-		return JOptionPane.showConfirmDialog(frame, message, "", JOptionPane.YES_NO_OPTION) 
+		return JOptionPane.showConfirmDialog(jFrame, message, "", JOptionPane.YES_NO_OPTION) 
 				== JOptionPane.YES_OPTION;
 	}
 	
-	private void reinitialiser()
+	void reinitialiser()
 	{
 		if (demandeConfirmation("Cette action vous fera abandonner la partie en cours. Etes-vous sûr de vouloir continuer ?"))
 		{
 			jeu2048.setCoordonneesListener(null);
 			jeu2048.reinitialiser();
-			getGrillePanel();
-			jeu2048.setCoordonneesListener(getCoordonneesListener());
-			frame.pack();
+			grille.reset();//getGrillePanel();
+			jeu2048.setCoordonneesListener(grille.getCoordonneesListener());
+			jFrame.pack();
 		}
 	}
 	
@@ -119,30 +105,11 @@ public class JFrame2048
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		panel.add(getScorePanel());
-		panel.add(getGrillePanel());
+		panel.add(grille.getPanel()/*getGrillePanel()*/);
 		panel.add(getDirectionPanel());
 //		panel.addKeyListener(getKeyListener());
 		jeu2048.setTransactionListener(getTransactionListener());
 		return panel;
-	}
-	
-	private JPanel getGrillePanel()
-	{
-		if (grillePanel == null)
-			grillePanel = new JPanel();
-		grillePanel.removeAll();
-		labels.clear();
-		grillePanel.setLayout(new GridLayout(getNbLignes(), getNbColonnes()));
-		for (Coordonnees coordonnees : jeu2048)
-		{
-			Tuile tuile = jeu2048.get(coordonnees);
-			int valeur = (tuile != null) ? tuile.getValeur() : 0;
-			TuileLabel label = new TuileLabel(coordonnees, valeur);
-			grillePanel.add(label);
-			labels.put(coordonnees, label);
-		}
-//		grillePanel.addKeyListener(getKeyListener());
-		return grillePanel;
 	}
 	
 	private JPanel getScorePanel()
@@ -167,6 +134,28 @@ public class JFrame2048
 		return panel;
 	}
 
+	private Runnable getRunnableAction(final int direction)
+	{
+		return new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				//enableFenetre(false);
+				switch (direction)
+				{
+				case HAUT: jeu2048.haut() ; break;
+				case BAS: jeu2048.bas() ; break;
+				case GAUCHE: jeu2048.gauche() ; break;
+				case DROITE: jeu2048.droite() ; break;
+				default: System.out.println("erreur !");
+				}
+				//enableFenetre(true);
+			}
+		};
+
+	}
+	
 	private ActionListener getBoutonListener(final int direction)
 	{
 		return new ActionListener()
@@ -174,23 +163,7 @@ public class JFrame2048
 			@Override
 			public void actionPerformed(ActionEvent arg0)
 			{
-				Runnable r = new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						//enableFenetre(false);
-						switch (direction)
-						{
-						case HAUT: jeu2048.haut() ; break;
-						case BAS: jeu2048.bas() ; break;
-						case GAUCHE: jeu2048.gauche() ; break;
-						case DROITE: jeu2048.droite() ; break;
-						default: System.out.println("erreur !");
-						}
-						//enableFenetre(true);
-					}
-				};
+				Runnable r = getRunnableAction(direction);
 				(new Thread(r)).start();
 			}
 		};
@@ -220,105 +193,6 @@ public class JFrame2048
 		return bouton;
 	}
 
-	private MenuItem getItemQuitter()
-	{
-		MenuItem item = new MenuItem("Fermer");
-		item.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				frame.dispose();
-			}
-		});
-		return item;
-	}
-
-	private MenuItem getItemReinitialiser()
-	{
-		MenuItem item = new MenuItem("Réinitialiser");
-		item.addActionListener(new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				reinitialiser();
-			}
-		});
-		return item;
-	}
-
-	private ActionListener getNbLignesListener(final String message, final boolean lignes)
-	{
-		return new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				String nb = (String)JOptionPane.showInputDialog(message);
-				if (nb != null)
-				{
-					if (lignes)
-						jeu2048.setNbLignes(new Integer(nb));
-					else
-						jeu2048.setNbColonnes(new Integer(nb));
-					reinitialiser();
-				}
-			}
-		};
-	}
-	
-	private MenuItem getItemNbLignes()
-	{
-		MenuItem item = new MenuItem("Changer le nombre de lignes");
-		item.addActionListener(getNbLignesListener("Nombre de lignes", true));
-		return item;
-	}
-
-	private MenuItem getItemNbColonnes()
-	{
-		MenuItem item = new MenuItem("Changer le nombre de colonnes");
-		item.addActionListener(getNbLignesListener("Nombre de colonnes", false));
-		return item;
-	}
-
-	private Listener<Boolean> getAnnulableListener(final MenuItem item)
-	{
-		return new Listener<Boolean>()
-		{
-			@Override
-			public void actionPerformed(Boolean action)
-			{
-				item.setEnabled(action);
-			}
-		};
-	}
-
-	private ActionListener getAnnulerListener(final boolean annuler)
-	{
-		return new ActionListener()
-		{
-			@Override
-			public void actionPerformed(ActionEvent arg0)
-			{
-				Runnable r = new Runnable()
-				{
-					@Override
-					public void run()
-					{
-						//enableFenetre(false);
-						if (annuler)
-							jeu2048.annuler();
-						else
-							jeu2048.retablir();
-						//enableFenetre(true);
-					}
-				};
-				(new Thread(r)).start();
-			}
-		};
-	}
-	
 	private Listener<Boolean> getTransactionListener()
 	{
 		return new Listener<Boolean>()
@@ -331,39 +205,7 @@ public class JFrame2048
 		};
 	}
 	
-	private MenuItem getItemAnnuler()
-	{
-		final MenuItem item = new MenuItem("Annuler");
-		item.addActionListener(getAnnulerListener(true));
-		item.setShortcut(new MenuShortcut(KeyEvent.VK_Z));
-		jeu2048.setAnnulableListener(getAnnulableListener(item));
-		return item;
-	}
-
-	private MenuItem getItemRetablir()
-	{
-		final MenuItem item = new MenuItem("Rétablir");
-		item.addActionListener(getAnnulerListener(false));
-		item.setShortcut(new MenuShortcut(KeyEvent.VK_R));
-		jeu2048.setRetablissableListener(getAnnulableListener(item));
-		return item;
-	}
-
-	private Listener<Coordonnees> getCoordonneesListener()
-	{
-		return new Listener<Coordonnees>()
-		{
-			@Override
-			public void actionPerformed(Coordonnees coordonnees)
-			{
-				TuileLabel label = labels.get(coordonnees); 
-				Tuile tuile = jeu2048.get(coordonnees); 
-				label.setValeur((tuile != null) ? tuile.getValeur() : 0);
-			}
-		};		
-	}
-	
-	private Listener<Integer> getScoreListener(final JLabel label )
+	private Listener<Integer> getScoreListener(final JLabel label)
 	{
 		return new Listener<Integer>()
 		{
