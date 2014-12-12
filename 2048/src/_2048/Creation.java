@@ -1,5 +1,6 @@
 package _2048;
 
+
 class Creation extends Operation
 {
 	private static final long serialVersionUID = -5040720192393632469L;

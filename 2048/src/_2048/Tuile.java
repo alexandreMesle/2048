@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.Serializable;
 
 public class Tuile implements Serializable

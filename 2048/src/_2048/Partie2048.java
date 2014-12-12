@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import java.util.Stack;
 class Partie2048 implements Serializable, Iterable<Coordonnees>
 {
 	private static final long serialVersionUID = -1393369598429605704L;
+	private Jeu2048 jeu2048;
 	final Direction GAUCHE, DROITE, HAUT, BAS;
 	final static int TEMPS_ATTENTE = 5;
 	private int valeurGagnante = 2048;
@@ -21,14 +23,10 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 	private int score = 0;
 	private Grille grille;
 	private Historique<Tour> historique = new Historique<>();
-	private transient Listener<Coordonnees> coordonneesListener = null;
-	private transient Listener<Integer> scoreListener = null;
-	transient private Listener<Boolean> transactionListener = null;
-	private transient Listener<Boolean> annulableListener = null, 
-			retablissableListener = null;
 	
-	Partie2048(int nbLignes, int nbColonnes, int puissanceGagnante)
+	Partie2048(Jeu2048 jeu2048, int nbLignes, int nbColonnes, int puissanceGagnante)
 	{
+		this.jeu2048 = jeu2048;
 		grille = new Grille(this, nbLignes, nbColonnes);
 		GAUCHE = new Direction(grille, 0, -1);
 		DROITE = new Direction(grille, 0, 1);
@@ -38,30 +36,17 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 		commenceTour();
 		executer(new Creation(this, grille.getCaseVideAleatoire(), Utils.valeurAleatoire()));
 	}
-	
-	boolean detruireTuile(int ligne, int colonne)
-	{
-		commenceTour();
-		return executer(new Destruction(this, 
-				new Coordonnees(grille, ligne, colonne)));
-	}
 
-//	boolean detruireTuile(Coordonnees coordonnees)
-//	{
-//		commenceTour();
-//		return executer(new Destruction(this, coordonnees));
-//	}
-//
 	void ajouteScore(int score)
 	{
 		this.score += score;
-		actionPerformed(this.score);
+		jeu2048.declencheListenerScore(this.score);
 	}
 
 	void enleveScore(int score)
 	{
 		this.score -= score;
-		actionPerformed(this.score);
+		jeu2048.declencheListenerScore(this.score);
 	}
 	
 	int getScore()
@@ -88,10 +73,10 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 	{
 		if (historique.annulable())
 		{
-			actionPerformedTransaction(false);
+			jeu2048.declencheListenerTransaction(false);
 			historique.annuler();
-			actionPerformedHistorique();
-			actionPerformedTransaction(true);
+			jeu2048.declencheListenerHistorique();
+			jeu2048.declencheListenerTransaction(true);
 			return true;
 		}
 		else
@@ -102,10 +87,10 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 	{
 		if (historique.retablissable())
 		{
-			actionPerformedTransaction(false);
+			jeu2048.declencheListenerTransaction(false);
 			historique.retablir();
-			actionPerformedHistorique();
-			actionPerformedTransaction(true);
+			jeu2048.declencheListenerHistorique();
+			jeu2048.declencheListenerTransaction(true);
 			return true;
 		}
 		else
@@ -137,7 +122,7 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 	
 	boolean mouvement(Direction direction)
 	{		
-		actionPerformedTransaction(false);
+		jeu2048.declencheListenerTransaction(false);
 		commenceTour();
 		List<Tuile> listeDeTuiles = new ArrayList<Tuile>(grille.getTuiles());
 		Comparator<Tuile> comparateur = getComparateur(direction);
@@ -146,11 +131,18 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 			t.mouvement(direction);
 		if (getTourActuel().getMouvementEffectue())
 			executer(new Creation(this, grille.getCaseVideAleatoire(), Utils.valeurAleatoire()));
-		actionPerformedHistorique();
-		actionPerformedTransaction(true);
+		jeu2048.declencheListenerHistorique();
+		jeu2048.declencheListenerTransaction(true);
 		return getTourActuel().getMouvementEffectue();
 	}
 	
+	boolean detruireTuile(int ligne, int colonne)
+	{
+		commenceTour();
+		return executer(new Destruction(this, 
+				new Coordonnees(grille, ligne, colonne)));
+	}
+
 	boolean gagne()
 	{
 		return valeurGagnanteAtteinte;
@@ -201,63 +193,6 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 		return res;
 	}
 	
-	void setCoordonneesListener(Listener<Coordonnees> listener)
-	{
-		this.coordonneesListener = listener;
-		if (listener != null)
-			for (Coordonnees coordonnees : grille)
-				actionPerformed(coordonnees);
-	}
-	
-	void setTransactionListener(Listener<Boolean> listener)
-	{
-		this.transactionListener = listener;
-	}
-	
-	void actionPerformed(Coordonnees coordonnees)
-	{
-		if (coordonneesListener != null && coordonnees != null)
-			coordonneesListener.actionPerformed(coordonnees);	
-	}
-
-	void actionPerformedTransaction(boolean lock)
-	{
-		if (transactionListener != null)
-			transactionListener.actionPerformed(lock);
-	}
-
-	void setScoreListener(Listener<Integer> listener)
-	{
-		this.scoreListener = listener;
-		if (listener != null)
-			actionPerformed(getScore());
-	}
-	
-	void actionPerformed(Integer score)
-	{
-		if (scoreListener != null)
-			scoreListener.actionPerformed(score);	
-	}
-
-	void setAnnulableListener(Listener<Boolean> listener)
-	{
-		this.annulableListener = listener;
-		actionPerformedHistorique();
-	}
-	
-	void setRetablissableListener(Listener<Boolean> listener)
-	{
-		this.retablissableListener = listener;
-		actionPerformedHistorique();
-	}
-	
-	void actionPerformedHistorique()
-	{
-		if (annulableListener != null)
-			annulableListener.actionPerformed(historique.annulable());
-		if (retablissableListener != null)
-			retablissableListener.actionPerformed(historique.retablissable());
-	}
 	
 	int getNbLignes()
 	{
@@ -283,5 +218,20 @@ class Partie2048 implements Serializable, Iterable<Coordonnees>
 	Tuile get(Coordonnees coordonnees)
 	{
 		return grille.get(coordonnees);
+	}
+	
+	boolean annulable()
+	{
+		return historique.annulable();
+	}
+	
+	boolean retablissable()
+	{
+		return historique.retablissable();
+	}
+	
+	void declencheListenerCoordonnees(Coordonnees coordonnees)
+	{
+		jeu2048.declencheListenerCoordonnees(coordonnees);
 	}
 }

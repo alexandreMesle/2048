@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +64,7 @@ class Grille implements Serializable, Iterable<Coordonnees>
 		if (coordonnees != null)
 		{
 			tuiles.put(coordonnees, tuile);
-			partie.actionPerformed(coordonnees);
+			partie.declencheListenerCoordonnees(coordonnees);
 		}
 		else
 			supprime(tuile);		
@@ -73,7 +74,7 @@ class Grille implements Serializable, Iterable<Coordonnees>
 	{
 		Coordonnees coordonnees = tuile.getCoordonnees();
 		tuiles.remove(coordonnees);
-		partie.actionPerformed(coordonnees);
+		partie.declencheListenerCoordonnees(coordonnees);
 	}
 	
 	boolean estVide(Coordonnees coordonnees)

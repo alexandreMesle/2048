@@ -1,5 +1,6 @@
 package _2048;
 
+
 class Destruction extends Operation
 {
 	private static final long serialVersionUID = -6836602562059509073L;

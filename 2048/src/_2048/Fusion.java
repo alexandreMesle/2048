@@ -1,5 +1,6 @@
 package _2048;
 
+
 class Fusion extends Operation
 {
 	private static final long serialVersionUID = 6846331205920753895L;

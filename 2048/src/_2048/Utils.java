@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.util.Random;
 
 class Utils
@@ -39,6 +40,4 @@ class Utils
 	{
 		return (Utils.nextBoolean()) ? 2 : 4;
 	}
-
-
 }

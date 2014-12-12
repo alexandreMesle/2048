@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.Serializable;
 
 class Tour extends Historique<Operation> implements Evenement, Serializable

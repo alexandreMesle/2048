@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.Serializable;
 
 public class Coordonnees implements Serializable, Comparable<Coordonnees>
@@ -76,7 +77,6 @@ public class Coordonnees implements Serializable, Comparable<Coordonnees>
 	@Override
 	public int compareTo(Coordonnees autre)
 	{
-		//System.out.println("compareTo" + this + " ? " + autre);
 		if (getLigne() == autre.getLigne())
 			return getColonne() - autre.getColonne();
 		return getLigne() - autre.getLigne();

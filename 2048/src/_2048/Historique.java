@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.Serializable;
 import java.util.Stack;
 

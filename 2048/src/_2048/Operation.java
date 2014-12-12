@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.Serializable;
 
 abstract class Operation implements Evenement, Serializable

@@ -1,5 +1,6 @@
 package _2048;
 
+
 class Direction extends Coordonnees
 {
 	private static final long serialVersionUID = -2309155139265325090L;

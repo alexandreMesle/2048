@@ -1,5 +1,6 @@
 package _2048;
 
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -32,26 +33,16 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		this(nbLignes, nbColonnes, 11);
 	}
 
-//	private void setGrille(Grille grille)
-//	{
-//		this.grille = grille;
-//	}
-//
-//	private  void setPuissanceGagnante(int puissanceGagnante)
-//	{
-//		this.puissanceGagnante = puissanceGagnante;
-//	}
+	private  void setPuissanceGagnante(int puissanceGagnante)
+	{
+		this.puissanceGagnante = puissanceGagnante;
+	}
 
 	public void reinitialiser()
 	{
-		partie2048 = new Partie2048(nbLignes, nbColonnes, puissanceGagnante);
-		partie2048.setCoordonneesListener(coordonneesListener);
-		partie2048.setTransactionListener(transactionListener);
-		partie2048.setScoreListener(scoreListener);
-		partie2048.setAnnulableListener(annulableListener);
-		partie2048.setRetablissableListener(retablissableListener);		
+		partie2048 = new Partie2048(this, nbLignes, nbColonnes, puissanceGagnante);
 	}
-	
+
 	public boolean gauche()
 	{
 		return partie2048.mouvement(partie2048.GAUCHE);
@@ -114,7 +105,6 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 	
 	public boolean detruireTuile(int ligne, int colonne)
 	{
-//		return partie2048.detruireTuile(new Coordonnees(partie2048, ligne, colonne));
 		return partie2048.detruireTuile(ligne, colonne);
 	}
 	
@@ -180,40 +170,62 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 
 	public void setCoordonneesListener(Listener<Coordonnees> listener)
 	{
-		coordonneesListener = listener;
-		partie2048.setCoordonneesListener(listener);
+		this.coordonneesListener = listener;
+		if (listener != null)
+			for (Coordonnees coordonnees : partie2048)
+				declencheListenerCoordonnees(coordonnees);
 	}
 	
-//	public void setScoreCoordonneesListener(Listener<Integer> listener)
-//	{
-//		scoreListener = listener;
-//		grille.setScoreListener(listener);
-//	}
+	public void setTransactionListener(Listener<Boolean> listener)
+	{
+		this.transactionListener = listener;
+	}
+
+	public void setScoreListener(Listener<Integer> listener)
+	{
+		this.scoreListener = listener;
+		if (listener != null)
+			declencheListenerScore(getScore());
+	}
 	
-	public void setScoreListener(Listener<Integer> scoreListener)
-	{
-		this.scoreListener = scoreListener;
-		partie2048.setScoreListener(scoreListener);
-	}
-
-	public void setTransactionListener(Listener<Boolean> transactionListener)
-	{
-		this.transactionListener = transactionListener;
-		partie2048.setTransactionListener(transactionListener);
-	}
-
 	public void setAnnulableListener(Listener<Boolean> listener)
 	{
-		annulableListener = listener;
-		partie2048.setAnnulableListener(listener);
+		this.annulableListener = listener;
+		declencheListenerHistorique();
 	}
 	
 	public void setRetablissableListener(Listener<Boolean> listener)
 	{
-		retablissableListener = listener;
-		partie2048.setRetablissableListener(listener);
+		this.retablissableListener = listener;
+		declencheListenerHistorique();
 	}
 	
+	void declencheListenerCoordonnees(Coordonnees coordonnees)
+	{
+		if (coordonneesListener != null && coordonnees != null)
+			coordonneesListener.actionPerformed(coordonnees);	
+	}
+
+	void declencheListenerTransaction(boolean lock)
+	{
+		if (transactionListener != null)
+			transactionListener.actionPerformed(lock);
+	}
+
+	void declencheListenerScore(Integer score)
+	{
+		if (scoreListener != null)
+			scoreListener.actionPerformed(score);	
+	}
+
+	void declencheListenerHistorique()
+	{
+		if (annulableListener != null)
+			annulableListener.actionPerformed(partie2048.annulable());
+		if (retablissableListener != null)
+			retablissableListener.actionPerformed(partie2048.retablissable());
+	}
+
 	public String toString()
 	{
 		return partie2048.toString();
