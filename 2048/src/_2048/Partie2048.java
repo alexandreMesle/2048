@@ -5,12 +5,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Stack;
 
 class Partie2048 implements Serializable, Iterable<Coordonnees>
 {

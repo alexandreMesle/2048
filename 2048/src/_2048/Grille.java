@@ -1,9 +1,8 @@
 package _2048;
 
-
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +15,7 @@ class Grille implements Serializable, Iterable<Coordonnees>
 	private static final long serialVersionUID = 6444629649066952174L;
 	private Partie2048 partie;
 	private int nbLignes, nbColonnes;
-	private Map<Coordonnees, Tuile> tuiles = new HashMap<>();
+	private Map<Coordonnees, Tuile> tuiles = new TreeMap<>();
 	private List<Coordonnees> coordonnees = new LinkedList<>();
 
 	Grille(Partie2048 partie, int nbLignes, int nbColonnes)
@@ -73,8 +72,11 @@ class Grille implements Serializable, Iterable<Coordonnees>
 	void supprime(Tuile tuile)
 	{
 		Coordonnees coordonnees = tuile.getCoordonnees();
-		tuiles.remove(coordonnees);
-		partie.declencheListenerCoordonnees(coordonnees);
+		if (coordonnees != null)
+		{
+			tuiles.remove(coordonnees);
+			partie.declencheListenerCoordonnees(coordonnees);
+		}
 	}
 	
 	boolean estVide(Coordonnees coordonnees)
