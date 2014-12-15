@@ -43,22 +43,22 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		partie2048 = new Partie2048(this, nbLignes, nbColonnes, puissanceGagnante);
 	}
 
-	public boolean gauche()
+	public synchronized boolean gauche()
 	{
 		return partie2048.mouvement(partie2048.GAUCHE);
 	}
 
-	public boolean droite()
+	public synchronized  boolean droite()
 	{
 		return partie2048.mouvement(partie2048.DROITE);
 	}
 
-	public boolean haut()
+	public synchronized boolean haut()
 	{
 		return partie2048.mouvement(partie2048.HAUT);
 	}
 
-	public boolean bas()
+	public synchronized boolean bas()
 	{
 		return partie2048.mouvement(partie2048.BAS);
 	}
@@ -108,12 +108,12 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		return partie2048.detruireTuile(ligne, colonne);
 	}
 	
-	public boolean annuler()
+	public synchronized boolean annuler()
 	{
 		return partie2048.annuler();
 	}
 	
-	public boolean retablir()
+	public synchronized boolean retablir()
 	{
 		return partie2048.retablir();
 	}
