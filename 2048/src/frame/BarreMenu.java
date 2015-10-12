@@ -8,10 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import _2048.Jeu2048;
 import _2048.Listener;
 
 class BarreMenu

@@ -15,7 +15,7 @@ import _2048.Coordonnees;
 class TuileLabel extends JLabel
 {
 	private static final long serialVersionUID = 7712249228589591390L;
-	private Coordonnees coordonnees;
+//	private Coordonnees coordonnees;
 	private final static Map<Integer, Color> couleursFond = new HashMap<>(),
 			couleursTexte = new HashMap<>();
 	
@@ -38,7 +38,7 @@ class TuileLabel extends JLabel
 	TuileLabel(Coordonnees coordonnees, int valeur)
 	{
 		super();
-		this.coordonnees = coordonnees;
+//		this.coordonnees = coordonnees;
 		setPreferredSize(new Dimension(50, 50));
 		setOpaque(true);
 		setValeur(valeur);
