@@ -8,6 +8,7 @@ import _2048.Coordonnees;
 import _2048.Jeu2048;
 import _2048.Listener;
 
+// TODO texte d'aide
 
 public class LigneCommande2048
 {
