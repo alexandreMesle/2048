@@ -33,11 +33,6 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		this(nbLignes, nbColonnes, 11);
 	}
 
-	private  void setPuissanceGagnante(int puissanceGagnante)
-	{
-		this.puissanceGagnante = puissanceGagnante;
-	}
-
 	public void reinitialiser()
 	{
 		partie2048 = new Partie2048(this, nbLignes, nbColonnes, puissanceGagnante);
