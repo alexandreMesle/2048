@@ -67,7 +67,7 @@ public class JFrame2048
 		jFrame.setEnabled(b);
 	}
 	
-	private boolean demandeConfirmation(String message)
+	boolean demandeConfirmation(String message)
 	{
 		return JOptionPane.showConfirmDialog(jFrame, message, "", JOptionPane.YES_NO_OPTION) 
 				== JOptionPane.YES_OPTION;
@@ -75,14 +75,10 @@ public class JFrame2048
 	
 	void reinitialiser()
 	{
-		if (demandeConfirmation("Cette action vous fera abandonner la partie en cours. Etes-vous sûr de vouloir continuer ?"))
-		{
-			jeu2048.setCoordonneesListener(null);
-			jeu2048.reinitialiser();
-			grille.reset();//getGrillePanel();
-			jeu2048.setCoordonneesListener(grille.getCoordonneesListener());
-			jFrame.pack();
-		}
+		jeu2048.reinitialiser();
+		grille.reset();//getGrillePanel();
+		jeu2048.setCoordonneesListener(grille.getCoordonneesListener());
+		jFrame.pack();
 	}
 	
 	private void sauvegarder()

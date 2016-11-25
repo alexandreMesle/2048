@@ -81,11 +81,15 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 	public void setNbLignes(int nbLignes)
 	{
 		this.nbLignes = nbLignes;
+		setCoordonneesListener(null);
+		reinitialiser();
 	}
 
 	public void setNbColonnes(int nbColonnes)
 	{
 		this.nbColonnes = nbColonnes;
+		setCoordonneesListener(null);
+		reinitialiser();
 	}
 	
 	public Tuile get(Coordonnees coordonnees)
@@ -98,7 +102,7 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		return partie2048.getScore();
 	}
 	
-	public boolean detruireTuile(int ligne, int colonne)
+	public synchronized boolean detruireTuile(int ligne, int colonne)
 	{
 		return partie2048.detruireTuile(ligne, colonne);
 	}
@@ -113,7 +117,7 @@ public class Jeu2048 implements Serializable, Iterable<Coordonnees>
 		return partie2048.retablir();
 	}
 	
-	public boolean sauvegarder(String fileName) 
+	public synchronized boolean sauvegarder(String fileName) 
 	{
 		ObjectOutputStream oos = null;
 		try

@@ -1,6 +1,5 @@
 package _2048;
 
-
 public class Deplacement extends Operation
 {
 	private static final long serialVersionUID = 4345504943178469271L;

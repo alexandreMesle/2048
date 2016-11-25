@@ -115,7 +115,7 @@ class BarreMenu
 			public void actionPerformed(ActionEvent arg0)
 			{
 				String nb = (String)JOptionPane.showInputDialog(message);
-				if (nb != null)
+				if (nb != null && jFrame2048.demandeConfirmation("Cette action vous fera abandonner la partie en cours. Etes-vous sûr de vouloir continuer ?"))
 				{
 					if (lignes)
 						jFrame2048.getJeu2048().setNbLignes(new Integer(nb));
